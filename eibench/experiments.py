@@ -94,9 +94,26 @@ def c5b(quick=False):
             for h in sizes for s in seeds(quick, 5, V02_SEEDS)]
 
 
+# ------------------------------------------------------------------ v0.3
+V03_SEEDS = 200  # fresh seeds, never used before
+
+
+def c2c(quick=False):
+    """C2c + C2-rep2: reset turnover vs shrink-and-perturb vs none (plasticity control)."""
+    arms = (("turnover", "reset", True), ("shrink_perturb", "shrink_perturb", True), ("no_turnover", "reset", False))
+    return [_c2_arm(quick, cond, mode, every, s, "c2c")
+            for cond, mode, every in arms for s in seeds(quick, 10, V03_SEEDS)]
+
+
+def c1_power(quick=False):
+    """C1/C4 with 20 seeds, to settle the posdis bound."""
+    return c1(quick, n_seeds=20, offset=V03_SEEDS)
+
+
 SUITES = {
     "v0": {"c1": c1, "c3": c3, "c5": c5, "c2": c2},
     # ordered longest-first so parallel workers finish together
     "v0.2": {"c2b": c2b, "c3b": c3b, "c5b": c5b, "c1": c1_rep},
+    "v0.3": {"c2c": c2c, "c1": c1_power},
 }
-DEFAULT_SUITE = "v0.2"
+DEFAULT_SUITE = "v0.3"

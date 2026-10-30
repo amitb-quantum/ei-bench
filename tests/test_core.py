@@ -117,3 +117,22 @@ def test_heterogeneous_lr_scales_updates():
     d = (S.out.weight - fresh.out.weight).abs().mean(dim=(1, 2))
     ratio = (d[-1] / d[0]).item()
     assert 3.0 < ratio < 5.0, ratio   # multipliers 0.5 .. 2.0 -> ratio 4
+
+
+def test_shrink_perturb_restores_fresh_norm_and_keeps_direction():
+    from eibench.agents import shrink_perturb_agent
+    torch.manual_seed(0)
+    S = SenderPop(3, 32, 64, 16, 10, 5)
+    with torch.no_grad():
+        for p in S.parameters():
+            p.mul_(4.0).add_(0.2)            # a "trained", larger-norm agent
+    before = [p.detach().clone() for p in S.parameters()]
+    info = shrink_perturb_agent(S, 1, sigma=0.1)
+    for k, (p, b) in enumerate(zip(S.parameters(), before)):
+        assert torch.equal(p[0], b[0]) and torch.equal(p[2], b[2])   # other agents untouched
+        d = info[k]
+        if d["fresh_norm"] == 0:                                     # zero-init tensor -> zero, as in reset
+            assert p[1].abs().sum() == 0
+            continue
+        assert abs(d["new_norm"] / d["fresh_norm"] - 1) < 0.1        # fresh-init scale
+        assert d["cos_to_old"] > 0.95                                # keeps the learned direction

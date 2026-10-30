@@ -308,15 +308,34 @@ def fig_sweep(plt, s, exp, out_dir, made):
 
 # ---------------------------------------------------------------- report
 NAMES = {"C1": "Beyond the objective", "C2": "Ongoing emergence", "C2b": "Ongoing emergence: reset vs. perturbation",
+         "C2c": "Ongoing emergence: reset vs. shrink-and-perturb", "C2c_sp_vs_none": "Shrink-and-perturb vs. no turnover (secondary)",
          "C3": "Interaction as source", "C3b": "Interaction: heterogeneous population",
          "C4": "Self-organized structure", "C5": "Jumps survive smooth metrics", "C5b": "Jumps: transition width"}
 
 
 def build(results_dir):
     runs = load(results_dir)
-    v02 = "c2b" in runs or "c3b" in runs or "c5b" in runs
+    v03 = "c2c" in runs
+    v02 = (not v03) and ("c2b" in runs or "c3b" in runs or "c5b" in runs)
     S = {"C1": crit_c1(runs), "C4": crit_c4(runs)}
-    if v02:
+    if v03:
+        S["C2"] = crit_turnover(runs, "c2c", "turnover", "no_turnover")
+        S["C2c"] = crit_turnover(runs, "c2c", "turnover", "shrink_perturb")
+        S["C2c_sp_vs_none"] = crit_turnover(runs, "c2c", "shrink_perturb", "no_turnover")
+        if S["C2c"]:
+            m, lo, hi = S["C2c"]["diff"]
+            S["C2c"]["reading"] = ("relearning from others adds beyond restored plasticity" if lo > 0 else
+                                   "S&P beats reset" if hi < 0 else
+                                   "restored plasticity accounts for the gain" if (lo >= -0.03 and hi <= 0.03) else
+                                   "not resolved at this sample size")
+            ev = [e for r in runs["c2c"].get("shrink_perturb", []) for e in r.get("turnover_events", [])
+                  if "sp_mean_cos_to_old" in e]
+            if ev:
+                S["C2c"]["sp_diag"] = {"events": len(ev),
+                                       "mean_cos_to_old": float(np.mean([e["sp_mean_cos_to_old"] for e in ev])),
+                                       "mean_norm_ratio": float(np.mean([e["sp_norm_ratio_new_over_old"] for e in ev]))}
+        scored = ["C1", "C2", "C2c", "C4"]
+    elif v02:
         S["C2"] = crit_turnover(runs, "c2b", "turnover", "no_turnover")
         S["C2b"] = crit_turnover(runs, "c2b", "turnover", "perturb")
         S["C3b"] = crit_mix(runs, "c3b", "het_mixed", "het_isolated")
@@ -331,13 +350,15 @@ def build(results_dir):
         scored = ["C1", "C2", "C3", "C4", "C5"]
 
     plt, made = _plt(), []
-    tex = "c2b" if v02 else "c2"
+    tex = "c2c" if v03 else ("c2b" if v02 else "c2")
     fig_turnover(plt, runs.get(tex, {}),
                  [("turnover", S1, "Turnover (reset)"), ("perturb", S3, "Perturbation (matched)"),
-                  ("no_turnover", S2, "No turnover")],
-                 f"{'C2/C2b' if v02 else 'C2'} · Held-out accuracy (mean; band = min–max over seeds)",
+                  ("shrink_perturb", S3, "Shrink-and-perturb"), ("no_turnover", S2, "No turnover")],
+                 f"{'C2/C2c' if v03 else ('C2/C2b' if v02 else 'C2')} · Held-out accuracy (mean; band = min–max over seeds)",
                  results_dir, f"{tex}_curves.png", made)
-    if v02:
+    if v03:
+        pass
+    elif v02:
         g = runs.get("c3b", {})
         groups = [(lab, [("Mixed (all pairs)", final(g[f"{k}_mixed"]), S1),
                          ("Isolated (own pair)", final(g[f"{k}_isolated"]), S2)])
@@ -357,7 +378,7 @@ def build(results_dir):
             fig_sweep(plt, S["C5"], "c5", results_dir, made)
 
     any_run = next((r for e in runs.values() for rs in e.values() for r in rs), None)
-    L = [f"# EI-Bench {'v0.2' if v02 else 'v0'} — results", ""]
+    L = [f"# EI-Bench {'v0.3' if v03 else ('v0.2' if v02 else 'v0')} — results", ""]
     if any_run:
         n = sum(len(rs) for e in runs.values() for rs in e.values())
         wall = sum(r["wall_s"] for e in runs.values() for rs in e.values() for r in rs)
@@ -367,8 +388,9 @@ def build(results_dir):
     def key(k, s):
         if k == "C1":
             return f"held-out acc {fmt_ci(s['heldout_acc'])}, ratio {s['heldout_over_train']:.2f}"
-        if k in ("C2", "C2b"):
-            return f"Δ({s['arms'][0]}) − Δ({s['arms'][1]}) = {fmt_ci(s['diff'])}; MW p={s['mannwhitney_p_delta']:.3g}"
+        if k in ("C2", "C2b", "C2c"):
+            extra = f"; reading: {s['reading']}" if "reading" in s else ""
+            return f"Δ({s['arms'][0]}) − Δ({s['arms'][1]}) = {fmt_ci(s['diff'])}; MW p={s['mannwhitney_p_delta']:.3g}{extra}"
         if k in ("C3", "C3b"):
             return f"mixed − isolated = {fmt_ci(s['diff'])}; MW p={s['mannwhitney_p']:.3g}"
         if k == "C4":
@@ -396,7 +418,7 @@ def build(results_dir):
         for k in ("topsim", "posdis", "bosdis"):
             L.append(f"| {k} | {fmt_ci(s[k]['untrained'])} | {fmt_ci(s[k]['trained'])} | {fmt_ci(s[k]['diff'])} |")
         L.append("")
-    for k in ("C2", "C2b"):
+    for k in ("C2", "C2b", "C2c", "C2c_sp_vs_none"):
         s = S.get(k)
         if not s:
             continue
@@ -407,6 +429,12 @@ def build(results_dir):
         L += [f"- Gain after turnover start — {a}: {fmt_ci(s['delta_a'])}; {b}: {fmt_ci(s['delta_b'])}",
               f"- Final held-out accuracy — {a}: {fmt_ci(s['final_a'])}; {b}: {fmt_ci(s['final_b'])} (MW p={s['mannwhitney_p_final']:.3g})",
               f"- Topsim gain difference: {fmt_ci(s['topsim_delta_diff'])}"]
+        if "reading" in s:
+            L.append(f"- Pre-registered reading: **{s['reading']}**")
+        if "sp_diag" in s:
+            d = s["sp_diag"]
+            L.append(f"- Shrink-and-perturb diagnostics ({d['events']} events): new/old weight norm {d['mean_norm_ratio']:.2f}, "
+                     f"cosine to old weights {d['mean_cos_to_old']:.3f}")
         for arm, vals in s["per_seed_final"].items():
             L.append(f"- Per-seed final ({arm}): {', '.join(f'{v:.3f}' for v in vals)}")
         L.append("")

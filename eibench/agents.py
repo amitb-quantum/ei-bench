@@ -140,6 +140,28 @@ def perturb_agent(module: nn.Module, idx: int, generator: torch.Generator | None
     return norms
 
 
+@torch.no_grad()
+def shrink_perturb_agent(module: nn.Module, idx: int, sigma: float = 0.1) -> dict:
+    """Plasticity-restoring control (shrink-and-perturb): for every parameter tensor of agent
+    `idx`, w' = lam * w + sigma * f, where f is a fresh-init sample and lam = ||f|| / ||w||, so the
+    shrunk part has fresh-init norm and keeps the learned direction. Zero-init tensors (fresh value
+    0) become 0, as in a reset. Returns per-tensor diagnostics (norms, cosine to old)."""
+    params = list(module.parameters())
+    old = [p[idx].clone() for p in params]
+    module.reset_agent(idx)                      # writes a fresh sample f into slice idx
+    info = {}
+    for k, (p, o) in enumerate(zip(params, old)):
+        f = p[idx].clone()
+        nf, no = f.norm(), o.norm()
+        lam = (nf / no) if no > 0 else torch.zeros((), device=o.device)
+        new = lam * o + sigma * f
+        p[idx].copy_(new)
+        cos = float((new.flatten() @ o.flatten()) / (new.norm() * no)) if (new.norm() > 0 and no > 0) else 0.0
+        info[k] = {"old_norm": float(no), "fresh_norm": float(nf), "new_norm": float(new.norm()),
+                   "lam": float(lam), "cos_to_old": cos}
+    return info
+
+
 def reset_optimizer_slice(opt: torch.optim.Optimizer, module: nn.Module, idx: int):
     """Zero Adam moments for one agent's slice so a re-initialised agent truly starts fresh."""
     for p in module.parameters():

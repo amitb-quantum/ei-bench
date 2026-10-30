@@ -2,7 +2,7 @@
 
 **Emergent Intelligence, defined so it can be tested and can fail.**
 
-*Quantum Clarity LLC · AB · started 2026-10-29 · current version v0.2 (results in)*
+*Quantum Clarity LLC · AB · started 2026-10-29 · current version v0.3 (pre-registered)*
 
 ---
 
@@ -105,6 +105,16 @@ Pre-registered in `DEFINITION.md` §7 and committed before any v0.2 result exist
    saturate), while a reset restores it. Separating "learning from others" from "restored
    plasticity" is the v0.3 question.
 
+### v0.3 (pre-registered 2026-10-30 · 50 runs · fresh seeds from 200)
+
+One question: does turnover help because a newcomer **relearns the language from the population**,
+or only because a fresh agent **can learn again**? The control is **shrink-and-perturb**: the
+agent's weights are scaled down to a fresh agent's size and lightly noised, which restores
+plasticity but keeps latent knowledge. A calibration run before any experiment showed it
+recovers about 8× faster than a reset, so the two arms differ in what the agent still knows,
+not in weight scale. Also: C4 with 20 seeds to settle the posdis bound. Design and verdict rules
+are in `DEFINITION.md` §9.
+
 ## Quickstart
 
 Tested on WSL2 (Ubuntu 26.04) with an RTX 5090 and a conda/miniforge env. It also runs on CPU, just slower.
@@ -112,15 +122,17 @@ Tested on WSL2 (Ubuntu 26.04) with an RTX 5090 and a conda/miniforge env. It als
 ```bash
 bash scripts/setup_env.sh            # creates conda env "eibench", installs, checks the GPU
 conda activate eibench
-pytest -q                            # 9 unit tests
+pytest -q                            # 10 unit tests
 
-bash scripts/launch.sh 3 --quick     # smoke test, a few minutes -> results/v02_quick
-bash scripts/launch.sh 6             # full v0.2 grid, about 3 h on an RTX 5090 -> results/v02 (resumable)
+bash scripts/launch.sh 3 --quick     # smoke test, a few minutes -> results/v03_quick
+bash scripts/launch.sh 6             # full v0.3 grid, about 1.5-2 h on an RTX 5090 -> results/v03
 python -m eibench.run --progress     # done / running per experiment
-python -m eibench.report --results results/v02   # REPORT.md, summary.json, figures
+python -m eibench.report --results results/v03   # REPORT.md, summary.json, figures
 ```
 
-- `--suite v0` reruns the original grid. `--exp c2b,c5b` selects experiments, `--dry-run` lists
+- Workers restart themselves after a crash (for example a transient CUDA driver fault); see
+  `grep -h crashed logs/worker_*.log`. Stop everything with `pkill -f scripts/worker.sh; pkill -f eibench.run`.
+- `--suite v0` or `--suite v0.2` reruns an earlier grid. `--exp c2b,c5b` selects experiments, `--dry-run` lists
   pending runs, and `--device cpu` forces CPU.
 - Any number of workers can share a grid: runs are claimed with lock files, finished runs are
   skipped, and locks left by dead workers are reclaimed. Re-running a command resumes the grid.
@@ -153,8 +165,8 @@ python -m eibench.report --results results/v02   # REPORT.md, summary.json, figu
 
 ```
 eibench/   config · data · agents · metrics · stats · train · experiments · run · report
-scripts/   setup_env.sh · env_check.py · launch.sh
-tests/     split coverage · metric sanity · reset/perturb matching · per-agent LR · transition width
+scripts/   setup_env.sh · env_check.py · launch.sh · worker.sh (self-restarting worker)
+tests/     split coverage · metric sanity · reset/perturb/shrink matching · per-agent LR · transition width
 results/   (git-ignored) per-run JSON, REPORT.md, summary.json, figures
 DEFINITION.md   the definition, thresholds, results log and pre-registrations
 CHANGES.md      version history
@@ -174,7 +186,7 @@ combinations of a familiar kind.
 | Stage | What | Headline question |
 |---|---|---|
 | **v0.2** *(done)* | perturbation control, heterogeneous populations, mirage test | C5 is a mirage; heterogeneity does not rescue C3; turnover beats perturbation |
-| **v0.3** | plasticity-restoring control (shrink-and-perturb) and a "reset without teachers" arm; write up the toy-system EI profile | Is turnover's gain learning from others, or restored plasticity? |
+| **v0.3** *(pre-registered)* | shrink-and-perturb control; C4 with 20 seeds; then write up the toy-system EI profile | Is turnover's gain learning from others, or restored plasticity? |
 | **v1** | **LLM agent society**: small open models with persistent memory, same harness and criteria, tasks that need coordination no single agent was trained for | Does the profile change when the agents are language models? |
 | **v2** | continual-learning agents (weights updated in deployment) plus world-model grounding | C2 as the headline: development that never stops |
 | **Side track** | physical substrates, such as MBQC (resource state plus adaptive measurement) | Emergence without a program |

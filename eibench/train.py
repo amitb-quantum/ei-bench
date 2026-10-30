@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from .agents import ReceiverPop, SenderPop, perturb_agent, reset_optimizer_slice
+from .agents import ReceiverPop, SenderPop, perturb_agent, reset_optimizer_slice, shrink_perturb_agent
 from .config import Config
 from .data import all_objects, one_hot_objects, split_objects
 from .metrics import structure_metrics
@@ -158,14 +158,21 @@ def train_run(cfg: Config, device: str = "auto", verbose: bool = True) -> dict:
             i = int(rng.integers(N))
             role = "sender" if rng.random() < 0.5 else "receiver"
             mod = sender if role == "sender" else receiver
+            sp = None
             if cfg.turnover_mode == "perturb":
                 disp = perturb_agent(mod, i)
+            elif cfg.turnover_mode == "shrink_perturb":
+                sp = shrink_perturb_agent(mod, i, sigma=cfg.sp_sigma); disp = None
             else:
                 mod.reset_agent(i); disp = None
             reset_optimizer_slice(opt, mod, i)
             ev = {"step": step, "agent": i, "role": role, "mode": cfg.turnover_mode}
             if disp is not None:
                 ev["displacement_norm"] = float(sum(v * v for v in disp.values()) ** 0.5)
+            if sp is not None:
+                ev["sp_mean_cos_to_old"] = float(np.mean([v["cos_to_old"] for v in sp.values() if v["old_norm"] > 0]))
+                ev["sp_norm_ratio_new_over_old"] = float(
+                    sum(v["new_norm"] ** 2 for v in sp.values()) ** 0.5 / max(1e-12, sum(v["old_norm"] ** 2 for v in sp.values()) ** 0.5))
             events.append(ev)
 
         idx = torch.randint(len(train_t), (cfg.batch_size,), device=dev)

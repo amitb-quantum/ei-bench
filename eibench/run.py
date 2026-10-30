@@ -18,7 +18,7 @@ from .experiments import DEFAULT_SUITE, SUITES
 
 
 def default_out(suite: str, quick: bool) -> str:
-    name = {"v0": "full", "v0.2": "v02"}[suite]
+    name = {"v0": "full", "v0.2": "v02", "v0.3": "v03"}[suite]
     return os.path.join("results", f"{name}_quick" if quick and suite != "v0" else ("quick" if quick else name))
 
 

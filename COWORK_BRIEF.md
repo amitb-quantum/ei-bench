@@ -1,84 +1,64 @@
-# Brief for Claude (Cowork) — run EI-Bench v0 on vermithor
+# Brief for Claude (Cowork): run EI-Bench v0.2 on vermithor
 
-**Owner:** AB (Quantum Clarity LLC). **Machine:** `vermithor`, WSL2 Ubuntu 26.04, RTX 5090, miniforge3 conda.
-**Goal:** set up EI-Bench v0, verify it, run the full experiment grid, and hand back the results.
-Read `README.md` and `DEFINITION.md` first.
+**Owner:** AB (Quantum Clarity LLC). **Machine:** `vermithor`, WSL2 Ubuntu 26.04, RTX 5090, conda env `eibench`.
+**State:** v0 is installed at `~/projects/ei-bench` (local git repo; v0 results in `results/full`).
+**Goal:** upgrade the code to v0.2, verify it, run the pre-registered v0.2 grid, and hand back the results.
+Read `DEFINITION.md` §6–7 first: it lists the new tests and their pass thresholds.
 
 ## Ground rules
 
-1. **Preservation first.** Create only the new conda env `eibench`. Do not modify, update, or
-   remove any existing conda env, system package, or file outside `~/projects/ei-bench`.
+1. **Preservation first.** Do not touch `results/full` (v0 results), other conda envs, or anything
+   outside `~/projects/ei-bench`. v0.2 writes to `results/v02`.
 2. **Do not change the science.** The thresholds in `DEFINITION.md` and the grids in
-   `eibench/experiments.py` are pre-registered. If you find a real bug, fix it, record it in
-   `CHANGES.md` (what, why, which runs it affects), delete only the affected result JSONs, and
-   re-run them. Never tune hyperparameters to change a verdict.
-3. **No pushing anywhere.** Use a local git repo only.
-4. Stop and ask AB if a step fails twice in the same way.
+   `eibench/experiments.py` are pre-registered. For a real bug: fix it, log it in `CHANGES.md`,
+   delete only the affected JSONs, and re-run them. Never tune to change a verdict.
+3. Local git only, no pushing. Stop and ask AB if a step fails twice the same way.
 
 ## Steps
 
-### 0. Unpack
-The archive `ei-bench-v0.1.tar.gz` is in AB's Windows Downloads folder
-(`/mnt/c/Users/<windows-user>/Downloads/`). Find it with
-`ls /mnt/c/Users/*/Downloads/ei-bench-v0.1.tar.gz`, then:
+### 1. Upgrade in place
+The archive `ei-bench-v0.2.tar.gz` is in `/tmp` (or AB's Windows Downloads folder).
 ```bash
-mkdir -p ~/projects && tar xzf /mnt/c/Users/<windows-user>/Downloads/ei-bench-v0.1.tar.gz -C ~/projects
 cd ~/projects/ei-bench
-```
-If `~/projects/ei-bench` already exists, stop and ask before overwriting.
-
-### 1. Environment
-```bash
-nvidia-smi                                  # GPU visible inside WSL?
-source ~/miniforge3/bin/activate            # if conda is not already on PATH
-bash scripts/setup_env.sh                   # ends by running scripts/env_check.py
-```
-**Checkpoint:** `env_check.py` prints `READY`, shows the RTX 5090 with compute capability 12.0,
-and lists `sm_120` among the compiled archs. If CUDA is not available, check `nvidia-smi` and the
-Windows NVIDIA driver; do not install a CUDA toolkit inside WSL. If it still fails, report it
-and continue on CPU only with AB's OK.
-
-### 2. Tests and smoke run
-```bash
+git status --short                      # should be clean; if not, commit first
+tar xzf /tmp/ei-bench-v0.2.tar.gz -C ~/projects   # overwrites code only; results/ is not in the archive
 conda activate eibench
-pytest -q                                           # expect: 5 passed
-python -m eibench.run --quick --quiet
-python -m eibench.report --results results/quick
-```
-**Checkpoint:** 16 quick runs complete and the report is written. The quick-mode verdicts are
-meaningless (300 steps); this step only proves the pipeline works on the GPU. Note the
-per-run times. The `device_name` in the JSONs should be the 5090.
-
-### 3. Snapshot
-```bash
-git init -q && git add -A && git commit -qm "EI-Bench v0.1 as received"
+git add -A && git commit -qm "EI-Bench v0.2 code + pre-registration"
+pytest -q                               # expect: 8 passed
 ```
 
-### 4. Full run (expected about 1–2 h on the 5090; resumable)
+### 2. Smoke test (about 3–5 min)
 ```bash
-nohup python -m eibench.run > results_full.log 2>&1 &
-tail -f results_full.log
+bash scripts/launch.sh 3 --quick
+python -m eibench.run --progress --quick      # repeat until 30/30
+python -m eibench.report --results results/v02_quick
 ```
-Order: c1 → c3 → c5 → c2 (c2 is the long one). If the process dies, run the same command again;
-finished runs are skipped. While it runs, watch for:
-- `nan` in any logged metric,
-- any c1 or c3 run finishing with `train` accuracy below 0.9 (a non-converged run).
+**Checkpoint:** 30/30 runs, no `Traceback` in `logs/worker_*.log`, and the report lists C1, C2, C2b, C3b, C4
+and C5b. The quick verdicts are meaningless (300 steps). Clear the old logs before the full run: `rm logs/*.log`.
 
-Record these as anomalies; do not re-run or drop them.
-
-### 5. Report and package
+### 3. Full v0.2 grid: 160 runs, expect about 2–3 h
 ```bash
-python -m eibench.report --results results/full
-tar czf ei-bench-results-full.tar.gz results/full/REPORT.md results/full/summary.json \
-    results/full/*.png results_full.log CHANGES.md 2>/dev/null || \
-tar czf ei-bench-results-full.tar.gz results/full/REPORT.md results/full/summary.json results/full/*.png results_full.log
-cp ei-bench-results-full.tar.gz /mnt/c/Users/<windows-user>/Downloads/
-git add -A && git commit -qm "Full v0 results" || true
+bash scripts/launch.sh 6
+watch -n 60 python -m eibench.run --progress     # or check it now and then
+nvidia-smi                                         # GPU should be busy
+```
+Six workers share one work queue (lock files), and the longest runs are scheduled first. If anything
+dies, run `bash scripts/launch.sh 6` again; finished runs are skipped and stale locks are reclaimed.
+If the GPU looks saturated (~100%) and runs are slowing down, 4 workers is fine as well.
+
+Anomalies to record (do not re-run or drop them): `nan` in any log, and any c1/c3b run with final
+`train` below 0.9.
+
+### 4. Report and package
+```bash
+python -m eibench.report --results results/v02
+tar czf ei-bench-results-v02.tar.gz results/v02/REPORT.md results/v02/summary.json results/v02/*.png logs/
+cp ei-bench-results-v02.tar.gz /mnt/c/Users/<windows-user>/Downloads/ 2>/dev/null || true
+git add -A && git commit -qm "v0.2 results" || true
 ```
 
 ## What to report back to AB
-1. The EI-profile table from `results/full/REPORT.md`, verbatim.
-2. Total wall time and the GPU used.
-3. Anomalies (NaNs, non-converged runs, any bug fixes listed in `CHANGES.md`).
-4. Confirmation that `ei-bench-results-full.tar.gz` is in Downloads, so AB can bring it back
-   to the planning chat.
+1. The EI-profile table from `results/v02/REPORT.md`, verbatim, plus the per-seed lines for C2/C2b.
+2. Wall time, number of workers used, and GPU utilization seen.
+3. Anomalies and any `CHANGES.md` entries.
+4. Where `ei-bench-results-v02.tar.gz` is.

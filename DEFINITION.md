@@ -1,6 +1,6 @@
-# Emergent Intelligence — an operational definition (v0.1)
+# Emergent Intelligence — an operational definition (v0.2)
 
-*Quantum Clarity LLC · draft for discussion · 2026-10-29*
+*Quantum Clarity LLC · draft for discussion · v0.1 2026-10-29 · v0.2 pre-registration added 2026-10-29 (§6–7)*
 
 ## 1. Why a definition, not a rename
 
@@ -82,6 +82,45 @@ only on its own private language, while the mixed population must work across ev
   grounding; C2 becomes the headline criterion.
 * **Side track**: physical substrates (MBQC-style resource state plus adaptive measurement)
   as an "emergence without a program" case study.
+
+## 6. v0 results (RTX 5090, 46 runs, 5 seeds)
+
+| # | Verdict | Key number |
+|---|---|---|
+| C1 | PASS | held-out accuracy 0.993 [0.981, 1.000]; held-out/train 0.99 |
+| C2 | PASS | Δ(turnover) − Δ(none) = 0.108 [0.032, 0.210]; all 5 turnover seeds ≥ 0.997, control seeds 0.656–0.990 |
+| C3 | FAIL | mixed − isolated = −0.020 [−0.053, 0.010]; mixed cross-play 0.958 vs. 0 (required by the objective, so not counted) |
+| C4 | INCONCLUSIVE | topsim gain 0.114 [0.061, 0.177] passes; posdis gain 0.070 [0.033, 0.105] misses the 0.05 bound; bosdis ≈ 0 |
+| C5 | INCONCLUSIVE | J(exact) 0.58, J(per-attribute) 0.31; per-attribute accuracy and NLL rise steadily across sizes 16–128 |
+
+Readings: (a) near-perfect generalization with only weakly compositional languages, as in
+Chaabouni et al. (2020); (b) the C5 exact-match "jump" looks largely like a metric effect;
+(c) the C2 mechanism is ambiguous: turnover might help through iterated learning, or just by
+perturbing a population stuck in a poor convention.
+
+## 7. v0.2 pre-registration (written after v0, before any v0.2 run)
+
+v0 verdicts are final and are not re-scored. v0.2 adds new tests and an independent
+replication with **10 fresh seeds (100–109)** and the same task and channel as v0. Results go
+to `results/v02`.
+
+| Test | Design | Primary metric | PASS if |
+|---|---|---|---|
+| **C1/C4-rep** | single pair, 10 seeds | as in v0 | as in v0 |
+| **C2-rep** | mixed N=4: turnover (reset) vs. none, 24k steps | as in v0 | as in v0 |
+| **C2b** perturbation control | adds a third arm, **perturb**: on the same schedule, the chosen agent's weights get isotropic Gaussian noise whose norm equals the displacement a reset would have caused (per parameter tensor), and its Adam state is cleared as in a reset | Δ held-out accuracy, as in C2 | CI of (Δ_reset − Δ_perturb) > 0, meaning the gain comes from relearning the language from others, not from disruption alone |
+| **C3b** heterogeneous populations | N=4; each agent gets its own learning-rate multiplier, geometrically spaced in [0.5, 2] (senders ascending, receivers descending); applied identically to the mixed and isolated arms | held-out accuracy (scored as in C3) | CI of (het-mixed − het-isolated) > 0 |
+| C3b secondary | same at N=8; homogeneous N=4 replicate | reported, not scored | — |
+| **C5b** transition width | hidden ∈ {4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256} × 5 seeds | 10–90% transition width, in octaves of hidden size, of the seed-mean curve normalized to its own min/max; *w_e* (exact match) and *w_c* (per-attribute accuracy); ratio *R = w_c / w_e*; 95% CI by resampling seeds within each size | **NO-JUMP** if w_e > 2.5 octaves. Otherwise **MIRAGE** (FAIL) if R ≥ 2 and CI lower bound > 1.5; **PASS** if R ≤ 1.5 and CI upper bound < 2; else **INCONCLUSIVE** |
+
+Secondary statistics for C2/C2b/C3b: a two-sided Mann–Whitney U test on the per-seed values,
+reported but not scored. It is robust to single outlier seeds such as v0's control seed 3.
+
+v0's J statistic is still reported for C5b for continuity, but it is not scored there,
+because J depends on grid spacing and a finer grid lowers J by construction.
+
+For reference, applying the C5b rule to v0's coarser grid gives w_e ≈ 1.6 and w_c ≈ 3.3
+octaves (R ≈ 2.0). That calculation is the reason for the cut points above; v0.2 is the actual test.
 
 ## References
 

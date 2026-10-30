@@ -122,6 +122,24 @@ class ReceiverPop(nn.Module):
         _reset_module(self, idx)
 
 
+@torch.no_grad()
+def perturb_agent(module: nn.Module, idx: int, generator: torch.Generator | None = None) -> dict:
+    """Displacement-matched control for turnover: for every parameter tensor, add isotropic
+    Gaussian noise to agent `idx` whose norm equals ||fresh_init - current||, i.e. the distance
+    a reset would have moved it. Returns per-tensor displacement norms (for logging)."""
+    params = list(module.parameters())
+    old = [p[idx].clone() for p in params]
+    module.reset_agent(idx)                      # writes a fresh sample into slice idx
+    norms = {}
+    for k, (p, o) in enumerate(zip(params, old)):
+        d = (p[idx] - o).norm()
+        noise = torch.randn(o.shape, device=o.device, dtype=o.dtype, generator=generator)
+        nn_ = noise.norm()
+        p[idx].copy_(o + noise * (d / nn_) if nn_ > 0 else o)
+        norms[k] = float(d)
+    return norms
+
+
 def reset_optimizer_slice(opt: torch.optim.Optimizer, module: nn.Module, idx: int):
     """Zero Adam moments for one agent's slice so a re-initialised agent truly starts fresh."""
     for p in module.parameters():

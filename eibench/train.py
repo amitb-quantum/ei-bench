@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from .agents import ReceiverPop, SenderPop, reset_optimizer_slice
+from .agents import ReceiverPop, SenderPop, perturb_agent, reset_optimizer_slice
 from .config import Config
 from .data import all_objects, one_hot_objects, split_objects
 from .metrics import structure_metrics
@@ -87,6 +87,7 @@ def train_run(cfg: Config, device: str = "auto", verbose: bool = True) -> dict:
     sender = SenderPop(cfg.pop_size, d_obj, cfg.hidden, cfg.embed, cfg.vocab_size, cfg.msg_len).to(dev)
     receiver = ReceiverPop(cfg.pop_size, cfg.n_attributes, cfg.n_values, cfg.hidden, cfg.embed,
                            cfg.vocab_size).to(dev)
+    N = cfg.pop_size
     opt = torch.optim.Adam(list(sender.parameters()) + list(receiver.parameters()), lr=cfg.lr)
     decay_start = int((1 - cfg.lr_decay_frac) * cfg.steps)
 
@@ -98,7 +99,15 @@ def train_run(cfg: Config, device: str = "auto", verbose: bool = True) -> dict:
 
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lr_mult)
 
-    N = cfg.pop_size
+    # per-agent learning-rate multipliers (heterogeneous populations). Adam is invariant to
+    # gradient scale, so we scale each agent's *update* instead: w <- w_old + m_i * (w_adam - w_old)
+    hetero = cfg.lr_spread != 1.0 and N > 1
+    if hetero:
+        k = cfg.lr_spread
+        m = torch.tensor(np.geomspace(1.0 / k, k, N), dtype=torch.float32, device=dev)
+        mult_s, mult_r = m.view(N, 1, 1), m.flip(0).view(N, 1, 1)
+        het_params = [(p, mult_s) for p in sender.parameters()] + [(p, mult_r) for p in receiver.parameters()]
+
     ident = torch.arange(N, device=dev)
     turnover_stop = int(cfg.turnover_stop_frac * cfg.steps)
     eval_steps = set(range(0, cfg.steps + 1, cfg.eval_every)) | {cfg.steps}
@@ -149,9 +158,15 @@ def train_run(cfg: Config, device: str = "auto", verbose: bool = True) -> dict:
             i = int(rng.integers(N))
             role = "sender" if rng.random() < 0.5 else "receiver"
             mod = sender if role == "sender" else receiver
-            mod.reset_agent(i)
+            if cfg.turnover_mode == "perturb":
+                disp = perturb_agent(mod, i)
+            else:
+                mod.reset_agent(i); disp = None
             reset_optimizer_slice(opt, mod, i)
-            events.append({"step": step, "agent": i, "role": role})
+            ev = {"step": step, "agent": i, "role": role, "mode": cfg.turnover_mode}
+            if disp is not None:
+                ev["displacement_norm"] = float(sum(v * v for v in disp.values()) ** 0.5)
+            events.append(ev)
 
         idx = torch.randint(len(train_t), (cfg.batch_size,), device=dev)
         tgt = train_t[idx]
@@ -163,7 +178,13 @@ def train_run(cfg: Config, device: str = "auto", verbose: bool = True) -> dict:
         loss = loss * N * cfg.n_attributes  # sum over agents & attributes, mean over batch
         opt.zero_grad(set_to_none=True)
         loss.backward()
+        if hetero:
+            olds = [p.detach().clone() for p, _ in het_params]
         opt.step()
+        if hetero:
+            with torch.no_grad():
+                for (p, mlt), o in zip(het_params, olds):
+                    p.copy_(o + mlt * (p - o))
         sched.step()
 
     final_tr = evaluate(sender, receiver, train_t, cfg)

@@ -37,6 +37,10 @@ class Config:
     turnover_every: int = 0
     turnover_start: int = 0       # step at which turnover begins
     turnover_stop_frac: float = 0.8  # stop resetting after this fraction of steps (settle phase)
+    turnover_mode: str = "reset"     # "reset" (new agent) or "perturb" (displacement-matched noise)
+
+    # heterogeneity: per-agent learning-rate multipliers geometrically spaced in [1/k, k]; 1 = homogeneous
+    lr_spread: float = 1.0
 
     # logging
     eval_every: int = 500

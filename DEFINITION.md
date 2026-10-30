@@ -1,6 +1,6 @@
 # Emergent Intelligence — an operational definition (v0.2)
 
-*Quantum Clarity LLC · draft for discussion · v0.1 2026-10-29 · v0.2 pre-registration added 2026-10-29 (§6–7)*
+*Quantum Clarity LLC · draft for discussion · v0.1 2026-10-29 · v0.2 pre-registration added 2026-10-29 (§6–7) · v0.2 results added 2026-10-30 (§8)*
 
 ## 1. Why a definition, not a rename
 
@@ -121,6 +121,41 @@ because J depends on grid spacing and a finer grid lowers J by construction.
 
 For reference, applying the C5b rule to v0's coarser grid gives w_e ≈ 1.6 and w_c ≈ 3.3
 octaves (R ≈ 2.0). That calculation is the reason for the cut points above; v0.2 is the actual test.
+
+## 8. v0.2 results (RTX 5090, 160 runs, seeds 100–109, completed 2026-10-30)
+
+| Test | Verdict | Key number |
+|---|---|---|
+| C1-rep | PASS | held-out accuracy 0.970 [0.941, 0.993]; held-out/train 0.99 |
+| C2-rep | PASS | Δ(turnover) − Δ(none) = 0.076 [0.033, 0.133]; MW p = 0.001 |
+| C2b | PASS | Δ(reset) − Δ(perturb) = 0.896 [0.813, 0.963]; perturb arm final accuracy 0.066 |
+| C3b | FAIL | het-mixed − het-isolated = −0.012 [−0.221, 0.135] |
+| C4-rep | INCONCLUSIVE | topsim gain 0.152 [0.131, 0.171] passes; posdis gain 0.076 [0.040, 0.112] misses the 0.05 bound again |
+| C5b | MIRAGE | transition width exact 1.44 vs. per-attribute 3.78 octaves; R = 2.63 [1.99, 3.80] |
+
+**Readings.**
+
+1. **Replications hold.** C1, C2 and C4 reproduce v0 with 10 independent seeds. The no-turnover
+   control again drifts down after convergence (Δ = −0.040), with one seed collapsing to 0.426.
+2. **The capability jump is a metric effect (C5b).** Exact-match accuracy appears to switch on
+   between hidden sizes 32 and 96. Per-attribute accuracy and NLL improve steadily across about
+   3.8 octaves. This reproduces Schaeffer et al. (2023) in a controlled toy system.
+3. **Interaction adds no capability here, even with heterogeneity (C3b).** Mixed populations
+   develop a shared language (cross-play 0.82–0.95 vs. 0), but no better generalization. At N=8,
+   mixing makes languages *less* compositional (posdis −0.052 [−0.076, −0.026], secondary).
+4. **C2b passes, but the control was not the clean comparison intended.** A post-hoc check
+   (not pre-registered) shows that noise matched to the reset displacement leaves an agent with
+   weight norms about 1.5× its trained values. Its output layer ends about 9× larger than a fresh
+   one, so symbol choice is nearly fixed and gradients largely vanish. The perturbed agent
+   loses plasticity; a reset agent regains it. So C2b shows that re-initialization beats an
+   equal-sized disruption. It does **not** yet separate "relearning from the population" from
+   "restored plasticity" (compare continual-learning results on resets and shrink-and-perturb).
+   The §7 phrase "the gain comes from relearning the language from others" overstated what C2b
+   can show. It is kept as written, as part of the pre-registration record.
+
+**Carried to v0.3 (to be pre-registered before running):** a plasticity-restoring control
+(shrink-and-perturb: w ← λw + small noise, matched so the result has fresh-init norm), and a
+"reset without teachers" arm (all agents reset together) to isolate learning from others.
 
 ## References
 

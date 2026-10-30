@@ -2,7 +2,7 @@
 
 **Emergent Intelligence, defined so it can be tested and can fail.**
 
-*Quantum Clarity LLC · AB · started 2026-10-29 · current version v0.2*
+*Quantum Clarity LLC · AB · started 2026-10-29 · current version v0.2 (results in)*
 
 ---
 
@@ -78,16 +78,32 @@ can be validated before it is pointed at anything ambitious.
    convention. v0.2 is designed to tell these apart.
 4. **The harness can fail things.** C3 failed. A definition that every system passes would be useless.
 
-### v0.2 (running · 160 runs · 10 fresh seeds)
+### v0.2 (2026-10-30 · 160 runs · 10 fresh seeds · RTX 5090)
 
-Pre-registered in `DEFINITION.md` §7 and committed before any v0.2 result existed.
+Pre-registered in `DEFINITION.md` §7 and committed before any v0.2 result existed. Results are in §8.
 
-| Test | Question |
-|---|---|
-| **C2b** | Does turnover beat a perturbation of matched size? If so, the gain comes from relearning from others, not from disruption. |
-| **C3b** | Do *heterogeneous* populations (different learning speeds) beat isolated pairs? |
-| **C5b** | On a 12-point size sweep, is the per-attribute transition ≥ 2× wider than the exact-match transition (MIRAGE)? |
-| Replications | C1, C2 and C4 with 10 new seeds |
+| Test | Verdict | Key number |
+|---|---|---|
+| C1 replication | **PASS** | held-out accuracy 0.970 [0.941, 0.993] |
+| C2 replication | **PASS** | turnover − none = 0.076 [0.033, 0.133]; Mann–Whitney p = 0.001 |
+| C2b reset vs. matched perturbation | **PASS** (with caveat) | reset − perturb = 0.896 [0.813, 0.963] |
+| C3b heterogeneous populations | **FAIL** | mixed − isolated = −0.012 [−0.221, 0.135] |
+| C4 replication | **INCONCLUSIVE** | topsim gain 0.152 [0.131, 0.171]; posdis gain just misses its bound |
+| C5b transition width | **MIRAGE** | per-attribute transition 2.63× wider than exact match [1.99, 3.80] |
+
+**What v0.2 showed:**
+1. **The replications hold** with 10 independent seeds.
+2. **The capability "jump" is a metric mirage.** Exact match appears to switch on between
+   hidden sizes 32 and 96, while per-attribute accuracy improves steadily across about 3.8
+   octaves. This reproduces Schaeffer et al. (2023) in a controlled system.
+3. **Interaction adds no capability here, even with heterogeneous agents.** Populations
+   agree on a shared language but do not generalize better. At N=8, mixing makes languages
+   less compositional.
+4. **Turnover robustly helps, and the mechanism is half-identified.** Replacing agents beats
+   an equal-sized weight perturbation decisively. A post-hoc check showed, however, that the
+   perturbation also destroys the agent's ability to learn (its weights grow, its outputs
+   saturate), while a reset restores it. Separating "learning from others" from "restored
+   plasticity" is the v0.3 question.
 
 ## Quickstart
 
@@ -99,7 +115,7 @@ conda activate eibench
 pytest -q                            # 9 unit tests
 
 bash scripts/launch.sh 3 --quick     # smoke test, a few minutes -> results/v02_quick
-bash scripts/launch.sh 6             # full v0.2 grid, about 2–3 h -> results/v02 (resumable)
+bash scripts/launch.sh 6             # full v0.2 grid, about 3 h on an RTX 5090 -> results/v02 (resumable)
 python -m eibench.run --progress     # done / running per experiment
 python -m eibench.report --results results/v02   # REPORT.md, summary.json, figures
 ```
@@ -157,8 +173,8 @@ combinations of a familiar kind.
 
 | Stage | What | Headline question |
 |---|---|---|
-| **v0.2** *(running)* | perturbation control, heterogeneous populations, mirage test | Is C2 real emergence? Does diversity make interaction matter? |
-| **v0.3** | settle what v0.2 leaves open (more seeds, larger N, longer horizons); write up the toy-system EI profile | A clean, citable baseline |
+| **v0.2** *(done)* | perturbation control, heterogeneous populations, mirage test | C5 is a mirage; heterogeneity does not rescue C3; turnover beats perturbation |
+| **v0.3** | plasticity-restoring control (shrink-and-perturb) and a "reset without teachers" arm; write up the toy-system EI profile | Is turnover's gain learning from others, or restored plasticity? |
 | **v1** | **LLM agent society**: small open models with persistent memory, same harness and criteria, tasks that need coordination no single agent was trained for | Does the profile change when the agents are language models? |
 | **v2** | continual-learning agents (weights updated in deployment) plus world-model grounding | C2 as the headline: development that never stops |
 | **Side track** | physical substrates, such as MBQC (resource state plus adaptive measurement) | Emergence without a program |

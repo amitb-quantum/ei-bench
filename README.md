@@ -179,6 +179,6 @@ definition, and a public benchmark release once v1 runs.
 ## Author
 
 AB, Founder and Principal Investigator, **Quantum Clarity LLC** (Milpitas, CA) ·
-[quantum-clarity.com](https://quantum-clarity.com) · GitHub [@amitb-gpu](https://github.com/amitb-gpu)
+[quantum-clarity.com](https://quantum-clarity.com) · GitHub [@amitb-quantum](https://github.com/amitb-quantum)
 
 License: not yet chosen.

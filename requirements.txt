@@ -1,0 +1,5 @@
+torch>=2.7          # 2.7+ with CUDA 12.8+ is required for RTX 50-series (sm_120)
+numpy>=1.26
+scipy>=1.11
+matplotlib>=3.8
+pytest>=8

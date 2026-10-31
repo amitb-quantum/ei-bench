@@ -1,6 +1,6 @@
-# Emergent Intelligence — an operational definition (v0.3)
+# Emergent Intelligence — an operational definition (v0.2)
 
-*Quantum Clarity LLC · draft for discussion · v0.1 2026-10-29 · v0.2 pre-registration added 2026-10-29 (§6–7) · v0.2 results added 2026-10-30 (§8) · v0.3 pre-registration added 2026-10-30 (§9)*
+*Quantum Clarity LLC · draft for discussion · v0.1 2026-10-29 · v0.2 pre-registration added 2026-10-29 (§6–7) · v0.2 results added 2026-10-30 (§8)*
 
 ## 1. Why a definition, not a rename
 
@@ -156,46 +156,6 @@ octaves (R ≈ 2.0). That calculation is the reason for the cut points above; v0
 **Carried to v0.3 (to be pre-registered before running):** a plasticity-restoring control
 (shrink-and-perturb: w ← λw + small noise, matched so the result has fresh-init norm), and a
 "reset without teachers" arm (all agents reset together) to isolate learning from others.
-
-## 9. v0.3 pre-registration (written 2026-10-30, after v0.2, before any v0.3 run)
-
-**Question.** Does turnover help because a newcomer must *relearn the language from the
-population* (iterated learning), or only because a fresh agent *can learn again* (restored
-plasticity)? Earlier verdicts are final and are not re-scored. All runs use fresh seeds starting
-at 200, with the same task, channel and C2 schedule as v0.2. Results go to `results/v03`.
-
-**Shrink-and-perturb arm (S&P).** On the same schedule as turnover, the chosen agent keeps its
-weights but each parameter tensor of that agent is rescaled and lightly noised:
-w′ = λ·w + σ·f, where f is a fresh initialization sample, σ = 0.1, and λ = ‖f‖ / ‖w‖. The
-shrunk part therefore has the norm of a fresh agent. Parameters whose fresh value is zero (the
-sender's start-of-message vector) become zero, as in a reset. The agent's Adam state is cleared,
-as in a reset. S&P restores fresh-scale weights (plasticity) while keeping the direction of what
-the agent had learned (cosine to the old weights > 0.95 per tensor).
-
-*Calibration, run before any v0.3 experiment (one trained N=4 population, CPU, not scored).*
-Function is not preserved immediately: the agent's held-out accuracy with its partners drops
-from 0.92 to 0.02, close to a reset's 0. Its knowledge is preserved in latent form, though: after
-50 further training steps it is back to 0.53, against 0.07 for a reset (0.80 vs. 0.78 at 150
-steps; both about 0.92 at 500). Total weight norm after S&P is 0.50 of the trained agent's,
-against 0.49 for a reset. So the two arms match on weight scale and differ in what the agent
-still knows, which is the contrast C2c needs. A uniform shrink to the same norm behaves the same
-way (0.59 at 50 steps), so the result does not hinge on the per-tensor choice.
-
-| Test | Design | Primary metric | Verdict rule |
-|---|---|---|---|
-| **C2c** (scored) | mixed N=4, 24k steps: reset turnover vs. S&P, 10 seeds (200–209) | Δ held-out accuracy (end minus turnover start), as in C2 | **PASS** if the CI of (Δ_reset − Δ_S&P) lies entirely > 0. Otherwise INCONCLUSIVE if the mean is > 0, else FAIL |
-| C2c reading | — | — | PASS: relearning from others adds beyond restored plasticity. Not PASS (FAIL or INCONCLUSIVE) with the whole CI inside [−0.03, 0.03]: restored plasticity accounts for the gain. A CI entirely < 0: S&P beats reset. Anything else: not resolved at this sample size |
-| **C2-rep2** (scored) | same runs: reset vs. a no-turnover arm, 10 seeds | as in C2 | as in C2 |
-| C2c secondary | S&P vs. no turnover | Δ, as in C2 | reported, not scored |
-| **C4-power** (scored) | single pair, 20 seeds (200–219) | as in C4 | as in C4 |
-
-The "reset without teachers" arm proposed in §8 is dropped. Resetting every agent at once
-erases the language at each event, so it would measure repeated restarts rather than isolate
-learning from others. S&P is the cleaner contrast, because it matches a reset on weight scale.
-
-Secondary statistics as in v0.2 (two-sided Mann–Whitney U, per-seed listings). A worker that
-crashes is restarted automatically; because a run's result is written only when the run
-finishes, a crash can neither drop nor duplicate a run.
 
 ## References
 

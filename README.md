@@ -197,4 +197,4 @@ definition, and a public benchmark release once v1 runs.
 AB, Founder and Principal Investigator, **Quantum Clarity LLC** (Milpitas, CA) ·
 [quantum-clarity.com](https://quantum-clarity.com) · GitHub [@amitb-gpu](https://github.com/amitb-gpu)
 
-License: not yet chosen.
+License: [Apache-2.0](LICENSE). Copyright 2026 Quantum Clarity LLC (see [NOTICE](NOTICE)).

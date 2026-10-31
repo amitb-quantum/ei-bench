@@ -7,6 +7,7 @@ name = "eibench"
 version = "0.1.0"
 description = "EI-Bench v0: operational criteria for emergent intelligence"
 requires-python = ">=3.10"
+license = "Apache-2.0"
 
 [tool.setuptools]
 packages = ["eibench"]

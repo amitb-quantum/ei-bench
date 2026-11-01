@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use EI-Bench, please cite the preprint below."
+title: "EI-Bench: an operational, pre-registered test of emergent intelligence"
+type: software
+authors:
+  - family-names: Brahmbhatt
+    given-names: Amit
+    orcid: "https://orcid.org/0009-0003-5882-8476"
+    affiliation: "Quantum Clarity LLC"
+repository-code: "https://github.com/amitb-quantum/ei-bench"
+url: "https://quantum-clarity.com"
+license: Apache-2.0
+version: "0.3.0"
+date-released: "2026-10-31"
+keywords:
+  - emergent intelligence
+  - emergent communication
+  - pre-registration
+  - iterated learning
+  - multi-agent systems
+preferred-citation:
+  type: article
+  title: "Emergent Intelligence, Defined So It Can Fail: A Pre-registered Test in AI Agents That Invent Their Own Language"
+  authors:
+    - family-names: Brahmbhatt
+      given-names: Amit
+      orcid: "https://orcid.org/0009-0003-5882-8476"
+      affiliation: "Quantum Clarity LLC"
+  doi: "10.5281/zenodo.23849135"
+  year: 2026
+  month: 10
+  publisher:
+    name: Zenodo

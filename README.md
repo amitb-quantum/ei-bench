@@ -2,7 +2,7 @@
 
 **Emergent Intelligence, defined so it can be tested and can fail.**
 
-*Quantum Clarity LLC · AB · started 2026-10-29 · current version v0.2 (results in)*
+*Quantum Clarity LLC · AB · started 2026-10-29 · current version v0.3 (results in)*
 
 ---
 
@@ -105,6 +105,33 @@ Pre-registered in `DEFINITION.md` §7 and committed before any v0.2 result exist
    saturate), while a reset restores it. Separating "learning from others" from "restored
    plasticity" is the v0.3 question.
 
+### v0.3 (2026-10-30 · 50 runs · fresh seeds from 200 · RTX 5090)
+
+One question: does turnover help because a newcomer **relearns the language from the population**,
+or only because a fresh agent **can learn again**? The control was **shrink-and-perturb**:
+weights scaled down to a fresh agent's size, keeping latent knowledge (calibrated before any run;
+`DEFINITION.md` §9).
+
+| Test | Verdict | Key number |
+|---|---|---|
+| C2c reset vs. shrink-and-perturb | **PASS** | +0.190 [0.004, 0.409]; Mann–Whitney p = 0.045 |
+| C2 replication (3rd time) | **PASS** | turnover − none = +0.233 [0.069, 0.443] |
+| C4 with 20 seeds | **FAIL** | posdis gain 0.039 [0.021, 0.058], below the 0.05 bound |
+
+**What v0.3 showed:** shrink-and-perturb gives no benefit over no turnover, while forcing
+newcomers to relearn from the population does, and it also makes languages more structured.
+The gain is **cultural transmission, not restored plasticity**. The effect is real but small at
+10 seeds. C4 is settled: the languages work without being cleanly disentangled.
+
+### The EI profile so far
+
+| C1 | C2 | C3 | C4 | C5 |
+|---|---|---|---|---|
+| PASS (×3) | PASS (×3); mechanism: transmission | FAIL (×2) | FAIL | MIRAGE |
+
+The emergence in this system came from **generations, not crowds**: mixing agents within a
+generation never added capability, but passing the language to new learners reliably improved it.
+
 ## Quickstart
 
 Tested on WSL2 (Ubuntu 26.04) with an RTX 5090 and a conda/miniforge env. It also runs on CPU, just slower.
@@ -112,15 +139,17 @@ Tested on WSL2 (Ubuntu 26.04) with an RTX 5090 and a conda/miniforge env. It als
 ```bash
 bash scripts/setup_env.sh            # creates conda env "eibench", installs, checks the GPU
 conda activate eibench
-pytest -q                            # 9 unit tests
+pytest -q                            # 10 unit tests
 
-bash scripts/launch.sh 3 --quick     # smoke test, a few minutes -> results/v02_quick
-bash scripts/launch.sh 6             # full v0.2 grid, about 3 h on an RTX 5090 -> results/v02 (resumable)
+bash scripts/launch.sh 3 --quick     # smoke test, a few minutes -> results/v03_quick
+bash scripts/launch.sh 6             # full v0.3 grid, about 1.5-2 h on an RTX 5090 -> results/v03
 python -m eibench.run --progress     # done / running per experiment
-python -m eibench.report --results results/v02   # REPORT.md, summary.json, figures
+python -m eibench.report --results results/v03   # REPORT.md, summary.json, figures
 ```
 
-- `--suite v0` reruns the original grid. `--exp c2b,c5b` selects experiments, `--dry-run` lists
+- Workers restart themselves after a crash (for example a transient CUDA driver fault); see
+  `grep -h crashed logs/worker_*.log`. Stop everything with `pkill -f scripts/worker.sh; pkill -f eibench.run`.
+- `--suite v0` or `--suite v0.2` reruns an earlier grid. `--exp c2b,c5b` selects experiments, `--dry-run` lists
   pending runs, and `--device cpu` forces CPU.
 - Any number of workers can share a grid: runs are claimed with lock files, finished runs are
   skipped, and locks left by dead workers are reclaimed. Re-running a command resumes the grid.
@@ -153,8 +182,8 @@ python -m eibench.report --results results/v02   # REPORT.md, summary.json, figu
 
 ```
 eibench/   config · data · agents · metrics · stats · train · experiments · run · report
-scripts/   setup_env.sh · env_check.py · launch.sh
-tests/     split coverage · metric sanity · reset/perturb matching · per-agent LR · transition width
+scripts/   setup_env.sh · env_check.py · launch.sh · worker.sh (self-restarting worker)
+tests/     split coverage · metric sanity · reset/perturb/shrink matching · per-agent LR · transition width
 results/   (git-ignored) per-run JSON, REPORT.md, summary.json, figures
 DEFINITION.md   the definition, thresholds, results log and pre-registrations
 CHANGES.md      version history
@@ -174,13 +203,21 @@ combinations of a familiar kind.
 | Stage | What | Headline question |
 |---|---|---|
 | **v0.2** *(done)* | perturbation control, heterogeneous populations, mirage test | C5 is a mirage; heterogeneity does not rescue C3; turnover beats perturbation |
-| **v0.3** | plasticity-restoring control (shrink-and-perturb) and a "reset without teachers" arm; write up the toy-system EI profile | Is turnover's gain learning from others, or restored plasticity? |
+| **v0.3** *(done)* | shrink-and-perturb control; C4 with 20 seeds | Turnover's gain is transmission, not plasticity; C4 FAIL |
+| **Write-up** | Zenodo preprint, [10.5281/zenodo.23849135](https://doi.org/10.5281/zenodo.23849135) | Emergence came from generations, not crowds |
 | **v1** | **LLM agent society**: small open models with persistent memory, same harness and criteria, tasks that need coordination no single agent was trained for | Does the profile change when the agents are language models? |
 | **v2** | continual-learning agents (weights updated in deployment) plus world-model grounding | C2 as the headline: development that never stops |
 | **Side track** | physical substrates, such as MBQC (resource state plus adaptive measurement) | Emergence without a program |
 
 Planned outputs: a short write-up of the v0/v0.2 EI profile, an expanded position paper on the
 definition, and a public benchmark release once v1 runs.
+
+## Citation
+
+Preprint: A. Brahmbhatt, *Emergent Intelligence, Defined So It Can Fail: A Pre-registered Test in
+AI Agents That Invent Their Own Language*, Zenodo, 2026.
+DOI [10.5281/zenodo.23849135](https://doi.org/10.5281/zenodo.23849135). Source in `paper/`.
+GitHub's "Cite this repository" button uses `CITATION.cff`.
 
 ## References
 
@@ -195,6 +232,6 @@ definition, and a public benchmark release once v1 runs.
 ## Author
 
 AB, Founder and Principal Investigator, **Quantum Clarity LLC** (Milpitas, CA) ·
-[quantum-clarity.com](https://quantum-clarity.com) · GitHub [@amitb-gpu](https://github.com/amitb-gpu)
+[quantum-clarity.com](https://quantum-clarity.com) · GitHub [@amitb-quantum](https://github.com/amitb-quantum)
 
 License: [Apache-2.0](LICENSE). Copyright 2026 Quantum Clarity LLC (see [NOTICE](NOTICE)).

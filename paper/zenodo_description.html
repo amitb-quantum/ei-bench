@@ -1,30 +1,14 @@
-<h2 id="plain-language-summary">Plain-language summary</h2>
-<p>People call today's AI "artificial", but many of its abilities were
-never programmed by anyone; they appeared on their own. We asked whether
-that kind of "emergence" can be tested honestly, in a way that could
-also come out negative.</p>
-<p>We wrote down five checks and built small AI agents that must invent
-their own code words to describe objects to each other. Before every
-experiment we published our pass/fail rules, like sealing a prediction
-in an envelope before the result is known.</p>
-<p>What we found:</p>
-<ul>
-<li><strong>The agents invented working languages</strong> that
-correctly describe objects they had never seen.</li>
-<li><strong>An apparent sudden leap in ability</strong> as the agents
-got bigger turned out to be an illusion of how we scored them.</li>
-<li><strong>Putting more agents in conversation did not make them
-better.</strong></li>
-<li><strong>Regularly replacing agents with newcomers</strong>, who had
-to learn the language from the others, steadily improved it, much as
-human languages are refined as each generation learns them. Giving old
-agents a "refresh" without that relearning did not help.</li>
-</ul>
-<p>In short: in this system, emergence came from <strong>generations,
-not crowds</strong>. The same checks can now be applied to AI systems in
-use today, such as teams of AI assistants working together.</p>
+<h1
+id="emergent-intelligence-defined-so-it-can-fail-a-pre-registered-test-in-ai-agents-that-invent-their-own-language">Emergent
+Intelligence, Defined So It Can Fail: A Pre-registered Test in AI Agents
+That Invent Their Own Language</h1>
+<p><strong>Amit Brahmbhatt</strong> · Quantum Clarity LLC, Milpitas,
+California, USA · ORCID: <a
+href="https://orcid.org/0009-0003-5882-8476">0009-0003-5882-8476</a></p>
+<p>Preprint, version 1.0 · 31 October 2026 · DOI: <a
+href="https://doi.org/10.5281/zenodo.23849135">10.5281/zenodo.23849135</a></p>
 <h2 id="abstract">Abstract</h2>
-<p>"Emergent" is used loosely for capabilities that nobody designed. We
+<p>“Emergent” is used loosely for capabilities that nobody designed. We
 propose an operational definition that can fail. A capability is
 emergent with respect to its designer specification to the degree that
 it meets five criteria: it goes beyond the training objective (C1),
@@ -32,95 +16,470 @@ keeps developing after convergence (C2), is caused by interaction at
 equal compute (C3), comes with self-organized structure above an
 untrained baseline (C4), and, if it appears to switch on with scale,
 survives continuous metrics (C5). A system receives an <em>EI
-profile</em> of PASS / FAIL / INCONCLUSIVE verdicts rather than a
-label.</p>
-<p>We implement the criteria in EI-Bench, an open harness, and apply it
-to populations of neural agents that invent a discrete language in a
-reconstruction game. Every threshold was pre-registered in a public git
-history before the runs that test it. Across four rounds and 256 runs on
-one GPU, the profile is: C1 PASS (held-out accuracy 0.90–0.99 on unseen
-attribute combinations); C2 PASS, replicated three times; C3 FAIL,
-including with heterogeneous populations; C4 FAIL at 20 seeds; and the
-apparent capability jump with model size is a metric MIRAGE
-(per-attribute transition 2.6× wider than the exact-match
-transition).</p>
-<p>A shrink-and-perturb control shows that the turnover effect is not
-explained by restored plasticity. Forcing newcomers to relearn the
-language from the population improves it (+0.19 held-out accuracy, 95%
-CI [0.004, 0.409]), whereas restoring fresh-scale weights while keeping
-latent knowledge does not. We report two places where our pre-registered
-wording overclaimed or needed tightening, and how we handled them.</p>
-<h2 id="the-ei-profile">The EI profile</h2>
+profile</em> of
+<strong>PASS</strong>/<strong>FAIL</strong>/<strong>INCONCLUSIVE</strong>
+verdicts rather than a label. We implement the criteria in EI-Bench, an
+open harness, and apply it to populations of neural agents that invent a
+discrete language in a reconstruction game. Every threshold was
+pre-registered in a public git history before the runs that test it.
+Across four rounds and 256 runs on one GPU, the profile is: C1
+<strong>PASS</strong> (held-out accuracy 0.90–0.99 on unseen attribute
+combinations); C2 <strong>PASS</strong>, replicated three times; C3
+<strong>FAIL</strong>, including with heterogeneous populations; C4
+<strong>FAIL</strong> at 20 seeds; and the apparent capability jump with
+model size is a metric <strong>MIRAGE</strong> (per-attribute transition
+2.6× wider than the exact-match transition). A shrink-and-perturb
+control shows that the turnover effect is not explained by restored
+plasticity. Forcing newcomers to relearn the language from the
+population improves it (+0.19 held-out accuracy, 95% CI [0.004, 0.409]),
+whereas restoring fresh-scale weights while keeping latent knowledge
+does not. In this system, emergence came from generations, not crowds.
+We report two places where our pre-registered wording overclaimed or
+needed tightening, and how we handled them.</p>
+<h2 id="plain-language-summary">Plain-language summary</h2>
+<p>People call today’s AI “artificial”, but many of its abilities were
+never programmed by anyone; they appeared on their own. We asked whether
+that kind of “emergence” can be tested honestly, in a way that could
+also come out negative. We wrote down five checks and built small AI
+agents that must invent their own code words to describe objects to each
+other. Before every experiment we published our pass/fail rules, like
+sealing a prediction in an envelope before the result is known. The
+agents invented working languages that correctly describe objects they
+had never seen. An apparent sudden leap in ability as the agents got
+bigger turned out to be an illusion of how we scored them. Putting more
+agents in conversation did not make them better. But regularly replacing
+agents with newcomers, who had to learn the language from the others,
+steadily improved it, much as human languages are refined as each
+generation learns them. Giving old agents a “refresh” without that
+relearning did not help. In short: in this system, emergence came from
+generations, not crowds. The same checks can now be applied to AI
+systems in use today, such as teams of AI assistants working
+together.</p>
+<h2 id="1-introduction">1. Introduction</h2>
+<p>“Artificial intelligence” names where intelligence comes from: it is
+built. It says nothing about <em>how</em> capabilities arise. In modern
+learning systems many abilities are not written down by anyone; they
+follow from scale, data and interaction. “Emergent intelligence” would
+be a better description, but only if it means something specific. A word
+that every system qualifies for is useless, and claims of emergence are
+known to be fragile: abrupt “emergent abilities” of language models [8]
+can be artefacts of discontinuous metrics [7].</p>
+<p>We therefore treat emergence as an empirical property with a
+falsifiable test. Our contributions:</p>
+<ol type="1">
+<li><p><strong>An operational definition</strong> with five criteria and
+explicit verdict rules, reported as a profile rather than a label
+(Section 3).</p></li>
+<li><p><strong>EI-Bench</strong>, an open, single-GPU harness that
+implements the criteria for populations of communicating agents, with
+batched population training, turnover and perturbation controls, and
+bootstrap statistics (Section 4).</p></li>
+<li><p><strong>A pre-registered, four-round study</strong> of 256 runs,
+with thresholds committed to git before each round (Section 5). The
+profile it yields is C1 <strong>PASS</strong>, C2 <strong>PASS</strong>,
+C3 <strong>FAIL</strong>, C4 <strong>FAIL</strong>, C5
+<strong>MIRAGE</strong>.</p></li>
+<li><p><strong>A mechanism result for C2</strong>: generational turnover
+improves emergent languages through cultural transmission, not through
+restored plasticity.</p></li>
+</ol>
+<h2 id="2-related-work">2. Related work</h2>
+<p><strong>Emergent communication.</strong> Agents trained to coordinate
+through a discrete channel develop conventions in the sense of Lewis
+signalling games [5]. Chaabouni et al. [2] showed that such languages
+can generalize to unseen attribute combinations without being
+compositional, and introduced the positional and bag-of-symbols
+disentanglement measures we use. Rita et al. [6] found that population
+effects depend on heterogeneity among agents.</p>
+<p><strong>Iterated learning.</strong> When a language must be relearned
+by each new generation, transmission favours structure that is easy to
+learn [4]. Our turnover manipulation is a neural version of this
+idea.</p>
+<p><strong>Emergent abilities and metrics.</strong> Wei et al. [8]
+documented abilities that appear abruptly with scale; Schaeffer et al.
+[7] argued many are produced by non-linear or discontinuous metrics. Our
+C5 criterion operationalizes that critique.</p>
+<p><strong>Plasticity.</strong> Deep networks lose the ability to learn
+under continued training [3]; re-initialization and shrink-and-perturb
+[1] restore it. Any benefit of agent turnover must be separated from
+this effect, which is what our C2c control does.</p>
+<h2 id="3-an-operational-definition">3. An operational definition</h2>
+<p>Let a system S be produced by a designer specification D =
+(architecture, objective, data, training procedure). A capability of S
+is <em>emergent with respect to D</em> to the degree that it meets the
+criteria in Table 1.</p>
 <table>
 <thead>
 <tr class="header">
-<th>Criterion</th>
-<th>Question</th>
-<th>Verdict</th>
+<th style="text-align: left;">Criterion</th>
+<th style="text-align: left;">Question</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>C1 Beyond the objective</td>
-<td>Does the system do something its objective never rewarded?</td>
-<td><strong>PASS</strong> (3 rounds)</td>
+<td style="text-align: left;">C1 Beyond the objective</td>
+<td style="text-align: left;">Does S do something D never rewarded?</td>
 </tr>
 <tr class="even">
-<td>C2 Ongoing emergence</td>
-<td>Does it keep developing after convergence?</td>
-<td><strong>PASS</strong> (3 rounds); mechanism: cultural
-transmission</td>
+<td style="text-align: left;">C2 Ongoing emergence</td>
+<td style="text-align: left;">Does S keep developing after convergence,
+beyond more of the same training?</td>
 </tr>
 <tr class="odd">
-<td>C3 Interaction as source</td>
-<td>Does interaction add capability at equal compute?</td>
-<td><strong>FAIL</strong> (2 rounds)</td>
+<td style="text-align: left;">C3 Interaction as source</td>
+<td style="text-align: left;">Is part of the capability caused by
+interaction among agents, at equal compute?</td>
 </tr>
 <tr class="even">
-<td>C4 Self-organized structure</td>
-<td>Does unspecified structure form above baseline?</td>
-<td><strong>FAIL</strong> (20 seeds)</td>
+<td style="text-align: left;">C4 Self-organized structure</td>
+<td style="text-align: left;">Does unspecified structure form, above an
+untrained baseline?</td>
 </tr>
 <tr class="odd">
-<td>C5 Jumps survive smooth metrics</td>
-<td>Does an apparent capability jump hold up?</td>
-<td><strong>MIRAGE</strong></td>
+<td style="text-align: left;">C5 Jumps survive smooth metrics</td>
+<td style="text-align: left;">If a capability seems to switch on with
+scale, does the jump hold under continuous metrics?</td>
 </tr>
 </tbody>
 </table>
-<h2 id="how-the-study-was-done">How the study was done</h2>
-<ul>
-<li><strong>Task:</strong> a sender describes an object (4 attributes ×
-8 values) with a 6-symbol message; a receiver reconstructs it. 10% of
-attribute combinations are never seen in training.</li>
-<li><strong>Agents:</strong> GRU networks with discrete symbols, trained
-alone, in populations of 4–8, and with periodic replacement of agents
-("turnover").</li>
-<li><strong>Controls:</strong> matched-size weight perturbation (v0.2)
-and shrink-and-perturb (v0.3), which restores learning ability while
-keeping latent knowledge.</li>
-<li><strong>Statistics:</strong> seeds as the unit of replication; 95%
-bootstrap confidence intervals; Mann–Whitney U as a secondary test.</li>
-<li><strong>Pre-registration:</strong> each round's design and verdict
-rules were committed to git before that round ran. Seeds were never
-reused (0–4, 100–109, 200–219).</li>
-<li><strong>Compute:</strong> one NVIDIA RTX 5090; 256 runs in
-total.</li>
-</ul>
-<h2 id="files-in-this-record">Files in this record</h2>
-<ul>
-<li><code>ei_bench_emergent_intelligence.pdf</code>: the preprint (7
-pages).</li>
-<li><code>ei-bench-results-v0-v0.3.tar.gz</code>: every per-run result
-file (256 runs), the scored reports and figures for each round, the
-definition with all pre-registrations, and the git history showing that
-the rules came before the results.</li>
-</ul>
-<h2 id="code">Code</h2>
-<p>EI-Bench (Apache-2.0): <a
-href="https://github.com/amitb-quantum/ei-bench">https://github.com/amitb-quantum/ei-bench</a></p>
+<p><strong>Table 1.</strong> The five criteria. Each receives a verdict;
+together they form the system’s EI profile.</p>
+<p><strong>Verdicts.</strong> Seeds are the unit of replication. We
+report means with 95% percentile bootstrap confidence intervals over
+seeds (10,000 resamples). A test is <strong>PASS</strong> when the whole
+interval clears its threshold, <strong>INCONCLUSIVE</strong> when only
+the mean does, and <strong>FAIL</strong> otherwise; C5 adds
+<strong>MIRAGE</strong> and NO-JUMP outcomes. A two-sided Mann–Whitney U
+test is reported as a secondary statistic that is robust to outlier
+seeds.</p>
+<p><strong>Pre-registration.</strong> Every round’s design, thresholds
+and verdict rules were written into <code>DEFINITION.md</code> and
+committed to a public git repository before any run of that round.
+Earlier verdicts are never re-scored; follow-up questions receive new,
+separately named tests (C2 → C2b → C2c).</p>
+<h2 id="4-testbed-and-methods">4. Testbed and methods</h2>
+<p><strong>Task.</strong> Objects have A = 4 attributes with V = 8
+values each (4,096 objects). A sender maps an object to a message of L =
+6 symbols from a vocabulary of K = 16; a receiver must reconstruct every
+attribute from the message alone. Ten percent of attribute combinations
+(410 objects) are held out from training, while every individual value
+still appears in training. Nothing in D specifies the language, its
+structure, or what any symbol means.</p>
+<p><strong>Agents.</strong> Senders and receivers are GRU networks
+(hidden size 128, embedding 32 unless swept). Symbols are discrete in
+the forward pass and trained with straight-through Gumbel-softmax (τ =
+1). Populations use stacked parameters with a leading agent dimension,
+so a population of N senders and N receivers trains as one set of
+batched matrix multiplications.</p>
+<p><strong>Training.</strong> Adam (learning rate 10⁻³), batch 256,
+8,000 steps, with linear learning-rate decay to 0.05× over the last 20%
+of steps. In <em>mixed</em> populations, sender–receiver pairings are
+re-drawn every step; in the <em>isolated</em> control, each sender keeps
+one receiver. Both use identical parameters and compute.</p>
+<p><strong>Turnover (C2).</strong> Mixed populations with N = 4 train
+for 24,000 steps. From step 8,000 until 85% of training, every 500 steps
+one randomly chosen agent (sender or receiver) is replaced by a freshly
+initialized agent and its Adam state is cleared (24 events per run). The
+learning rate decays over the final 15%. The C2 metric is the change in
+held-out accuracy from step 8,000 (the start of the turnover phase) to
+the end, compared against an arm without turnover.</p>
+<p><strong>Controls.</strong> <em>C2b</em> (v0.2) adds isotropic
+Gaussian noise whose norm matches the displacement a reset would cause.
+<em>C2c</em> (v0.3) applies shrink-and-perturb [1]: w′ = λ·w + σ·f, with
+f a fresh initialization sample, σ = 0.1 and λ = ‖f‖ / ‖w‖ per parameter
+tensor, so the agent returns to fresh-init scale while keeping the
+direction of its learned weights.</p>
+<p><strong>Metrics.</strong> C1: exact-match accuracy on held-out
+combinations (chance 2.4 × 10⁻⁴). C3: held-out accuracy, scored over all
+N² pairings for mixed populations and own pairs only for isolated ones,
+a comparison that deliberately favours the control. C4: topographic
+similarity (Spearman correlation of pairwise meaning and message Hamming
+distances, 1,000 objects), and positional and bag-of-symbols
+disentanglement [2], each compared with the same agents before training;
+a <strong>PASS</strong> needs topsim gain &gt; 0.05 and posdis or bosdis
+gain &gt; 0.05. C5: model size is swept and exact-match accuracy is
+compared with per-attribute accuracy (Section 5.3).</p>
+<p><strong>Compute.</strong> All runs used one NVIDIA RTX 5090 under
+WSL2 with PyTorch 2.15 (CUDA 13.2), with up to six worker processes
+sharing a lock-file work queue. Summed training time was 136 min (v0, 46
+runs), 934 min (v0.2, 160 runs) and 531 min (v0.3, 50 runs).</p>
+<h2 id="5-results">5. Results</h2>
+<p>Table 2 summarizes all scored tests. Seeds were 0–4 (v0), 100–109
+(v0.2) and 200–219 (v0.3), never reused.</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Round</th>
+<th style="text-align: left;">Test</th>
+<th style="text-align: left;">Verdict</th>
+<th style="text-align: left;">Key number (mean [95% CI])</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">v0 (5 seeds)</td>
+<td style="text-align: left;">C1</td>
+<td style="text-align: left;"><strong>PASS</strong></td>
+<td style="text-align: left;">held-out acc. 0.993 [0.981, 1.000]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C2</td>
+<td style="text-align: left;"><strong>PASS</strong></td>
+<td style="text-align: left;">Δ(turnover) − Δ(none) = 0.108 [0.032,
+0.210]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C3</td>
+<td style="text-align: left;"><strong>FAIL</strong></td>
+<td style="text-align: left;">mixed − isolated = −0.020 [−0.053,
+0.010]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C4</td>
+<td style="text-align: left;"><strong>INCONCLUSIVE</strong></td>
+<td style="text-align: left;">posdis gain 0.070 [0.033, 0.105]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C5</td>
+<td style="text-align: left;"><strong>INCONCLUSIVE</strong></td>
+<td style="text-align: left;">jump ratios 0.58 (exact), 0.31
+(per-attribute)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">v0.2 (10 seeds)</td>
+<td style="text-align: left;">C1</td>
+<td style="text-align: left;"><strong>PASS</strong></td>
+<td style="text-align: left;">0.970 [0.941, 0.993]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C2</td>
+<td style="text-align: left;"><strong>PASS</strong></td>
+<td style="text-align: left;">0.076 [0.033, 0.133]; MW p = 0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C2b</td>
+<td style="text-align: left;"><strong>PASS</strong>†</td>
+<td style="text-align: left;">Δ(reset) − Δ(perturb) = 0.896 [0.813,
+0.963]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C3b</td>
+<td style="text-align: left;"><strong>FAIL</strong></td>
+<td style="text-align: left;">heterogeneous: −0.012 [−0.221, 0.135]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C4</td>
+<td style="text-align: left;"><strong>INCONCLUSIVE</strong></td>
+<td style="text-align: left;">posdis gain 0.076 [0.040, 0.112]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C5b</td>
+<td style="text-align: left;"><strong>MIRAGE</strong></td>
+<td style="text-align: left;">width ratio R = 2.63 [1.99, 3.80]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">v0.3</td>
+<td style="text-align: left;">C1 (20 seeds)</td>
+<td style="text-align: left;"><strong>PASS</strong></td>
+<td style="text-align: left;">0.899 [0.800, 0.975]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C2 (10 seeds)</td>
+<td style="text-align: left;"><strong>PASS</strong></td>
+<td style="text-align: left;">0.233 [0.069, 0.443]; MW p = 0.017</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C2c (10 seeds)</td>
+<td style="text-align: left;"><strong>PASS</strong></td>
+<td style="text-align: left;">Δ(reset) − Δ(S&amp;P) = 0.190 [0.004,
+0.409]; MW p = 0.045</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;">C4 (20 seeds)</td>
+<td style="text-align: left;"><strong>FAIL</strong></td>
+<td style="text-align: left;">posdis gain 0.039 [0.021, 0.058]</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Table 2.</strong> All scored verdicts. †See Section 6 on what
+C2b can and cannot show.</p>
+<h3 id="51-c1-generalization-beyond-the-objective">5.1 C1:
+generalization beyond the objective</h3>
+<p>Single sender–receiver pairs reconstruct held-out combinations almost
+as well as trained ones (held-out/train ratio 0.95–0.99), at roughly
+4,000 times chance. In v0.3, 2 of 20 pairs did not converge (0.195,
+0.444), which lowers the mean but not the verdict. This is the weak form
+of C1: generalization to unseen combinations of familiar parts.</p>
+<h3 id="52-c4-structure-is-real-but-not-disentangled">5.2 C4: structure
+is real but not disentangled</h3>
+<p>Topographic similarity rises reliably above the untrained baseline in
+every round (gain 0.114–0.152). Positional disentanglement improves too,
+but stays below the pre-registered 0.05 margin:
+<strong>INCONCLUSIVE</strong> at 5 and 10 seeds and
+<strong>FAIL</strong> at 20 seeds (gain 0.039 [0.021, 0.058]);
+bag-of-symbols disentanglement shows no gain. As in [2], the languages
+generalize well without being cleanly compositional.</p>
+<h3 id="53-c5-the-capability-jump-is-a-metric-mirage">5.3 C5: the
+capability jump is a metric mirage</h3>
+<p>v0.2 swept 12 hidden sizes from 4 to 256 (5 seeds each). Exact-match
+accuracy appears to switch on between sizes 32 and 96 (Figure 1).
+Per-attribute accuracy, a continuous measure of the same predictions,
+rises steadily over the whole range. The 10–90% transition widths are
+1.44 octaves for exact match and 3.78 octaves for per-attribute
+accuracy, a ratio of 2.63 [1.99, 3.80], which meets the pre-registered
+<strong>MIRAGE</strong> rule (R ≥ 2 with the CI lower bound above 1.5).
+Because exact match requires all four attributes to be correct, it
+compresses a gradual improvement into an apparent jump, as argued in
+[7].</p>
+<p><strong>Figure 1.</strong> C5b. Held-out accuracy versus hidden size
+(mean of 5 seeds per size). The apparent jump in exact match (blue)
+corresponds to a gradual rise in per-attribute accuracy (orange).
+<em>(Figure shown in the PDF.)</em></p>
+<h3 id="54-c3-interaction-within-a-generation-adds-nothing">5.4 C3:
+interaction within a generation adds nothing</h3>
+<p>Mixed populations reliably converge on a shared language: senders and
+receivers that never trained as a fixed pair understand each other
+(cross-play accuracy 0.82–0.96, against 0 for isolated pairs). This does
+not count towards C3, because the mixed objective requires it. On the
+capability that C3 scores, held-out generalization, mixed populations
+are no better than isolated pairs at equal compute: not with homogeneous
+agents (v0: −0.020; v0.2 replicate: −0.016), and not when agents learn
+at different speeds (v0.2 C3b, learning-rate multipliers from 0.5 to 2:
+−0.012 [−0.221, 0.135]). At N = 8, mixing even made languages less
+disentangled (posdis −0.052 [−0.076, −0.026], secondary).</p>
+<h3 id="55-c2-turnover-improves-languages-through-transmission">5.5 C2:
+turnover improves languages, through transmission</h3>
+<p>Replacing agents during training improved held-out accuracy relative
+to continued training in all three rounds (Table 2). The no-turnover arm
+tends to drift after convergence, and some seeds collapse (to 0.426 in
+v0.2 and 0.118 in v0.3), while turnover arms mostly end near 1.0.</p>
+<p><strong>Is it disruption?</strong> v0.2 compared turnover with a
+perturbation of matched size. Perturbed populations collapsed (final
+accuracy 0.066), which made C2b pass by a wide margin. A post-hoc
+diagnostic on a separately trained population showed why: matched noise
+left the perturbed agent’s weights about 1.5× larger than its trained
+weights, with an output layer about 9× larger than at initialization, so
+its symbol choices saturated and it largely stopped learning. C2b thus
+showed that re-initialization beats an equal-sized disruption, but not
+<em>why</em>.</p>
+<p><strong>Is it restored plasticity?</strong> v0.3 compared turnover
+with shrink-and-perturb, which returns the agent to fresh-init scale
+while keeping its learned direction (in the experiment runs, averaged
+over 240 events: weight norm 0.44 of the pre-intervention agent’s,
+cosine 0.945 to its old weights). A calibration run before any v0.3
+experiment confirmed the intended contrast: shrink-and-perturb brought
+weight norm to 0.50 of the trained agent’s (0.49 for a reset); the
+agent’s accuracy with its partners fell to 0.02 but recovered to 0.53
+within 50 steps, against 0.07 for a reset. Its knowledge was latent, not
+lost.</p>
+<p>The result (Figure 2): turnover beat shrink-and-perturb by 0.190
+[0.004, 0.409] (<strong>PASS</strong>, Mann–Whitney p = 0.045), and
+shrink-and-perturb did no better than no turnover at all (final accuracy
+0.771 vs. 0.728, p = 0.79). Turnover also produced more structured
+languages than shrink-and-perturb (topsim gain difference 0.046 [0.004,
+0.093]). Under the pre-registered reading, relearning the language from
+the population adds something that restored plasticity does not. This is
+what iterated learning predicts [4]. The effect is real at this sample
+size but its lower confidence bound is close to zero, and it is partly
+driven by control seeds that collapse.</p>
+<p><strong>Figure 2.</strong> C2c. Final held-out accuracy per seed (10
+seeds per arm, N = 4, 24,000 steps). Turnover ends near 1.0;
+shrink-and-perturb and no turnover are statistically indistinguishable.
+<em>(Figure shown in the PDF.)</em></p>
+<h2 id="6-deviations-corrections-and-incidents">6. Deviations,
+corrections and incidents</h2>
+<p>We list every departure from the pre-registered plan, because the
+method’s value depends on it.</p>
+<ol type="1">
+<li><p><strong>C2b wording overclaimed.</strong> The v0.2
+pre-registration said a C2b <strong>PASS</strong> would mean “the gain
+comes from relearning the language from others”. The post-hoc saturation
+check showed C2b cannot support that reading. The verdict stands; the
+wording is retained in the record and explicitly corrected in the
+results (<code>DEFINITION.md</code> §8). The question was carried into
+v0.3.</p></li>
+<li><p><strong>C2c design was calibrated, and its reading tightened,
+before any run.</strong> A first calibration showed that
+shrink-and-perturb destroys immediate function, which raised the
+question of whether it was a valid control. A recovery test showed
+knowledge is retained in latent form; this calibration was written into
+the pre-registration. The rule for reading an equivalence result was
+extended from “FAIL with the CI inside [−0.03, 0.03]” to any
+non-<strong>PASS</strong> with that CI, before any v0.3 run. A proposed
+“reset all agents” arm was dropped before running, with the reason
+recorded.</p></li>
+<li><p><strong>One worker crash.</strong> In v0.2 one of six worker
+processes died from a transient CUDA driver error. Results are written
+only when a run completes, and a stale lock is reclaimed, so the
+interrupted run was redone in full by another worker; all 160 runs
+completed. Workers restart themselves automatically from v0.3
+on.</p></li>
+</ol>
+<h2 id="7-limitations">7. Limitations</h2>
+<p>This is a deliberately small system. “Beyond the objective” here is
+compositional generalization, a weak form of C1. Results come from one
+task, one architecture family and one channel size, and C3 was tested
+only for pairings re-drawn every step. Thresholds such as the 0.05
+disentanglement margin are conventions we fixed in advance, not natural
+constants. With 10 seeds, C2c has limited precision; a larger
+replication would sharpen the effect size. Finally, a profile describes
+a system, not intelligence in general: the criteria are intended to be
+applied to other systems, where the verdicts may differ.</p>
+<h2 id="8-conclusion-and-future-work">8. Conclusion and future work</h2>
+<p>An operational, pre-registered definition of emergence is practical
+on a single GPU, and it discriminates: in this system it returned two
+passes, two failures and one mirage. The clearest positive finding is
+about mechanism. Capability improved when the language had to be passed
+to new learners, and did not improve when agents merely interacted more
+or regained plasticity. The next step applies the same harness and
+criteria to societies of language-model agents with persistent memory,
+running under a deterministic runtime authority layer that records
+tamper-evident evidence, to ask whether the same profile appears in
+systems that are deployed today.</p>
+<h2 id="data-and-code-availability">Data and code availability</h2>
+<p>Code (Apache-2.0), the full pre-registration history and all reports
+are in EI-Bench, <a
+href="https://github.com/amitb-quantum/ei-bench">https://github.com/amitb-quantum/ei-bench</a>.
+All 256 per-run result files, the scored reports and the
+pre-registration history are included as a dataset file in this Zenodo
+record.</p>
 <h2 id="acknowledgements">Acknowledgements</h2>
 <p>Experiment design, code and drafting were carried out with the
 assistance of an AI system (Claude, Anthropic). All experiments were
 run, checked and approved by the author, who takes responsibility for
 the content.</p>
+<h2 id="references">References</h2>
+<ol type="1">
+<li>J. T. Ash and R. P. Adams. On warm-starting neural network training.
+<em>NeurIPS</em>, 2020.</li>
+<li>R. Chaabouni, E. Kharitonov, D. Bouchacourt, E. Dupoux and M.
+Baroni. Compositionality and generalization in emergent languages.
+<em>ACL</em>, 2020.</li>
+<li>S. Dohare, J. F. Hernandez-Garcia, Q. Lan, P. Rahman, A. R. Mahmood
+and R. S. Sutton. Loss of plasticity in deep continual learning.
+<em>Nature</em>, 632:768–774, 2024.</li>
+<li>S. Kirby, H. Cornish and K. Smith. Cumulative cultural evolution in
+the laboratory: an experimental approach to the origins of structure in
+human language. <em>PNAS</em>, 105(31):10681–10686, 2008.</li>
+<li>D. Lewis. <em>Convention: A Philosophical Study</em>. Harvard
+University Press, 1969.</li>
+<li>M. Rita, F. Strub, J.-B. Grill, O. Pietquin and E. Dupoux. On the
+role of population heterogeneity in emergent communication.
+<em>ICLR</em>, 2022.</li>
+<li>R. Schaeffer, B. Miranda and S. Koyejo. Are emergent abilities of
+large language models a mirage? <em>NeurIPS</em>, 2023.</li>
+<li>J. Wei et al. Emergent abilities of large language models.
+<em>Transactions on Machine Learning Research</em>, 2022.</li>
+</ol>

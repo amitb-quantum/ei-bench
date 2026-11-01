@@ -115,22 +115,24 @@ weights scaled down to a fresh agent's size, keeping latent knowledge (calibrate
 | Test | Verdict | Key number |
 |---|---|---|
 | C2c reset vs. shrink-and-perturb | **PASS** | +0.190 [0.004, 0.409]; Mann–Whitney p = 0.045 |
-| C2 replication (3rd time) | **PASS** | turnover − none = +0.233 [0.069, 0.443] |
+| C2 (third round) | **PASS** | turnover − none = +0.233 [0.069, 0.443] |
 | C4 with 20 seeds | **FAIL** | posdis gain 0.039 [0.021, 0.058], below the 0.05 bound |
 
-**What v0.3 showed:** shrink-and-perturb gives no benefit over no turnover, while forcing
-newcomers to relearn from the population does, and it also makes languages more structured.
-The gain is **cultural transmission, not restored plasticity**. The effect is real but small at
-10 seeds. C4 is settled: the languages work without being cleanly disentangled.
+**What v0.3 showed:** forcing newcomers to relearn from the population beat the tested
+plasticity control (shrink-and-perturb), which itself showed no significant difference from no
+turnover, and turnover also made languages more structured. This **supports intergenerational
+transmission**, without uniquely identifying the mechanism. The effect clears its threshold but is
+small at 10 seeds. C4 is settled: the languages work without being cleanly disentangled.
 
 ### The EI profile so far
 
 | C1 | C2 | C3 | C4 | C5 |
 |---|---|---|---|---|
-| PASS (×3) | PASS (×3); mechanism: transmission | FAIL (×2) | FAIL | MIRAGE |
+| PASS (3 rounds) | PASS (3 rounds); supports transmission | FAIL (×2; tests partner mixing) | FAIL | MIRAGE |
 
-The emergence in this system came from **generations, not crowds**: mixing agents within a
-generation never added capability, but passing the language to new learners reliably improved it.
+In this testbed, improvement came from **generations, not crowds**: mixing partners within a
+generation did not demonstrate a generalization advantage, while passing the language to new
+learners improved it in all three rounds.
 
 ## Quickstart
 
@@ -214,8 +216,7 @@ definition, and a public benchmark release once v1 runs.
 
 ## Citation
 
-Preprint: A. Brahmbhatt, *Emergent Intelligence, Defined So It Can Fail: A Pre-registered Test in
-AI Agents That Invent Their Own Language*, Zenodo, 2026.
+Preprint: A. Brahmbhatt, *From Artificial to Emergent Intelligence: Five Testable Criteria and a First Pre-registered Profile*, Zenodo, 2026.
 DOI [10.5281/zenodo.23849135](https://doi.org/10.5281/zenodo.23849135). Source in `paper/`.
 GitHub's "Cite this repository" button uses `CITATION.cff`.
 

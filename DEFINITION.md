@@ -1,6 +1,6 @@
-# Emergent Intelligence — an operational definition (v0.2)
+# Emergent Intelligence — an operational definition (v0.3)
 
-*Quantum Clarity LLC · draft for discussion · v0.1 2026-10-29 · v0.2 pre-registration added 2026-10-29 (§6–7) · v0.2 results added 2026-10-30 (§8)*
+*Quantum Clarity LLC · draft for discussion · v0.1 2026-10-29 · v0.2 pre-registration added 2026-10-29 (§6–7) · v0.2 results added 2026-10-30 (§8) · v0.3 pre-registration added 2026-10-30 (§9) · v0.3 results added 2026-10-31 (§10)*
 
 ## 1. Why a definition, not a rename
 
@@ -157,11 +157,82 @@ octaves (R ≈ 2.0). That calculation is the reason for the cut points above; v0
 (shrink-and-perturb: w ← λw + small noise, matched so the result has fresh-init norm), and a
 "reset without teachers" arm (all agents reset together) to isolate learning from others.
 
+## 9. v0.3 pre-registration (written 2026-10-30, after v0.2, before any v0.3 run)
+
+**Question.** Does turnover help because a newcomer must *relearn the language from the
+population* (iterated learning), or only because a fresh agent *can learn again* (restored
+plasticity)? Earlier verdicts are final and are not re-scored. All runs use fresh seeds starting
+at 200, with the same task, channel and C2 schedule as v0.2. Results go to `results/v03`.
+
+**Shrink-and-perturb arm (S&P).** On the same schedule as turnover, the chosen agent keeps its
+weights but each parameter tensor of that agent is rescaled and lightly noised:
+w′ = λ·w + σ·f, where f is a fresh initialization sample, σ = 0.1, and λ = ‖f‖ / ‖w‖. The
+shrunk part therefore has the norm of a fresh agent. Parameters whose fresh value is zero (the
+sender's start-of-message vector) become zero, as in a reset. The agent's Adam state is cleared,
+as in a reset. S&P restores fresh-scale weights (plasticity) while keeping the direction of what
+the agent had learned (cosine to the old weights > 0.95 per tensor).
+
+*Calibration, run before any v0.3 experiment (one trained N=4 population, CPU, not scored).*
+Function is not preserved immediately: the agent's held-out accuracy with its partners drops
+from 0.92 to 0.02, close to a reset's 0. Its knowledge is preserved in latent form, though: after
+50 further training steps it is back to 0.53, against 0.07 for a reset (0.80 vs. 0.78 at 150
+steps; both about 0.92 at 500). Total weight norm after S&P is 0.50 of the trained agent's,
+against 0.49 for a reset. So the two arms match on weight scale and differ in what the agent
+still knows, which is the contrast C2c needs. A uniform shrink to the same norm behaves the same
+way (0.59 at 50 steps), so the result does not hinge on the per-tensor choice.
+
+| Test | Design | Primary metric | Verdict rule |
+|---|---|---|---|
+| **C2c** (scored) | mixed N=4, 24k steps: reset turnover vs. S&P, 10 seeds (200–209) | Δ held-out accuracy (end minus turnover start), as in C2 | **PASS** if the CI of (Δ_reset − Δ_S&P) lies entirely > 0. Otherwise INCONCLUSIVE if the mean is > 0, else FAIL |
+| C2c reading | — | — | PASS: relearning from others adds beyond restored plasticity. Not PASS (FAIL or INCONCLUSIVE) with the whole CI inside [−0.03, 0.03]: restored plasticity accounts for the gain. A CI entirely < 0: S&P beats reset. Anything else: not resolved at this sample size |
+| **C2-rep2** (scored) | same runs: reset vs. a no-turnover arm, 10 seeds | as in C2 | as in C2 |
+| C2c secondary | S&P vs. no turnover | Δ, as in C2 | reported, not scored |
+| **C4-power** (scored) | single pair, 20 seeds (200–219) | as in C4 | as in C4 |
+
+The "reset without teachers" arm proposed in §8 is dropped. Resetting every agent at once
+erases the language at each event, so it would measure repeated restarts rather than isolate
+learning from others. S&P is the cleaner contrast, because it matches a reset on weight scale.
+
+Secondary statistics as in v0.2 (two-sided Mann–Whitney U, per-seed listings). A worker that
+crashes is restarted automatically; because a run's result is written only when the run
+finishes, a crash can neither drop nor duplicate a run.
+
+## 10. v0.3 results (RTX 5090, 50 runs, seeds 200–219, completed 2026-10-30)
+
+| Test | Verdict | Key number |
+|---|---|---|
+| C2c | PASS | Δ(reset) − Δ(S&P) = 0.190 [0.004, 0.409]; MW p = 0.045 |
+| C2c reading | — | pre-registered reading: "relearning from others adds beyond restored plasticity" (scope: the tested S&P control; see the readings below) |
+| C2-rep2 | PASS | Δ(reset) − Δ(none) = 0.233 [0.069, 0.443]; MW p = 0.017 |
+| C2c secondary | — | S&P vs. none: final 0.771 vs. 0.728, MW p = 0.79 (no significant difference; not evidence of equivalence) |
+| C4-power | FAIL | topsim gain 0.121 [0.100, 0.142] passes; posdis gain 0.039 [0.021, 0.058] is below the 0.05 bound; bosdis ≈ 0 |
+| C1 (from the C4 runs) | PASS | held-out accuracy 0.899 [0.800, 0.975]; 2 of 20 pairs did not converge (0.195, 0.444) |
+
+**Readings.**
+
+1. **Turnover's benefit exceeds the tested plasticity control.** S&P vs. no turnover shows no
+   significant difference (which does not establish equivalence). Forcing a newcomer to relearn
+   from the population beats S&P. This supports transmission without uniquely identifying it.
+   Turnover also yields more structured languages than S&P (topsim gain difference 0.046
+   [0.004, 0.093]), as iterated-learning accounts predict.
+2. **The C2c effect is real but small at this sample size.** The CI lower bound is 0.004, and
+   the contrast is driven partly by control seeds that collapse (S&P 0.252 and 0.428). A larger
+   replication would firm up the effect size.
+3. **C4 is settled as FAIL.** With 20 seeds, positional disentanglement improves but stays below
+   the pre-registered bound. The earlier INCONCLUSIVE verdicts reflected sample size.
+
+**EI profile of this system after v0–v0.3:** C1 PASS (all three rounds), C2 PASS (observed in all
+three rounds; turnover beat the tested shrink-and-perturb control, which supports intergenerational
+transmission without uniquely identifying the mechanism), C3 FAIL (twice, including heterogeneous
+populations; note that C3 as run tests partner mixing, since both arms contain interacting pairs),
+C4 FAIL, C5 MIRAGE. In one line, for this testbed: improvement came from generations, not crowds.
+
 ## References
 
 * Lewis, D. (1969). *Convention.*
 * Anderson, P. W. (1972). More is different. *Science.*
 * Kirby, S. et al. (2008). Cumulative cultural evolution in the laboratory. *PNAS.*
+* Ash, J. & Adams, R. (2020). On warm-starting neural network training. *NeurIPS.* (shrink-and-perturb)
 * Chaabouni, R. et al. (2020). Compositionality and generalization in emergent languages. *ACL.*
 * Wei, J. et al. (2022). Emergent abilities of large language models. *TMLR.*
 * Rita, M. et al. (2022). On the role of population heterogeneity in emergent communication. *ICLR.*

@@ -5,7 +5,7 @@ That Invent Their Own Language</h1>
 <p><strong>Amit Brahmbhatt</strong> · Quantum Clarity LLC, Milpitas,
 California, USA · ORCID: <a
 href="https://orcid.org/0009-0003-5882-8476">0009-0003-5882-8476</a></p>
-<p>Preprint, version 1.0 · 31 October 2026 · DOI: <a
+<p>Preprint, version 1.0 (revised text) · 31 October 2026 · DOI: <a
 href="https://doi.org/10.5281/zenodo.23849135">10.5281/zenodo.23849135</a></p>
 <h2 id="abstract">Abstract</h2>
 <p>“Emergent” is used loosely for capabilities that nobody designed. We
@@ -22,48 +22,52 @@ verdicts rather than a label. We implement the criteria in EI-Bench, an
 open harness, and apply it to populations of neural agents that invent a
 discrete language in a reconstruction game. Every threshold was
 pre-registered in a public git history before the runs that test it.
-Across four rounds and 256 runs on one GPU, the profile is: C1
+Across three rounds and 256 runs on one GPU, the profile is: C1
 <strong>PASS</strong> (held-out accuracy 0.90–0.99 on unseen attribute
-combinations); C2 <strong>PASS</strong>, replicated three times; C3
-<strong>FAIL</strong>, including with heterogeneous populations; C4
+combinations); C2 <strong>PASS</strong>, observed in all three rounds;
+C3 <strong>FAIL</strong>, including with heterogeneous populations; C4
 <strong>FAIL</strong> at 20 seeds; and the apparent capability jump with
 model size is a metric <strong>MIRAGE</strong> (per-attribute transition
-2.6× wider than the exact-match transition). A shrink-and-perturb
-control shows that the turnover effect is not explained by restored
-plasticity. Forcing newcomers to relearn the language from the
-population improves it (+0.19 held-out accuracy, 95% CI [0.004, 0.409]),
-whereas restoring fresh-scale weights while keeping latent knowledge
-does not. In this system, emergence came from generations, not crowds.
-We report two places where our pre-registered wording overclaimed or
-needed tightening, and how we handled them.</p>
+2.6× wider than the exact-match transition). Here C1 tests
+generalization to unseen combinations within the trained task. Turnover
+also outperformed a shrink-and-perturb control designed to restore
+plasticity while retaining learned weight directions: the difference in
+held-out accuracy gain was +0.19 (95% CI [0.004, 0.409]). This supports
+a role for intergenerational transmission, without uniquely identifying
+the mechanism. In this testbed, turnover improved generalization,
+whereas mixing partners did not demonstrate an advantage: improvement
+came from generations, not crowds. We report two places where our
+pre-registered wording overclaimed or needed tightening, and how we
+handled them.</p>
 <h2 id="plain-language-summary">Plain-language summary</h2>
-<p>People call today’s AI “artificial”, but many of its abilities were
-never programmed by anyone; they appeared on their own. We asked whether
-that kind of “emergence” can be tested honestly, in a way that could
-also come out negative. We wrote down five checks and built small AI
-agents that must invent their own code words to describe objects to each
-other. Before every experiment we published our pass/fail rules, like
-sealing a prediction in an envelope before the result is known. The
-agents invented working languages that correctly describe objects they
-had never seen. An apparent sudden leap in ability as the agents got
-bigger turned out to be an illusion of how we scored them. Putting more
-agents in conversation did not make them better. But regularly replacing
-agents with newcomers, who had to learn the language from the others,
-steadily improved it, much as human languages are refined as each
-generation learns them. Giving old agents a “refresh” without that
-relearning did not help. In short: in this system, emergence came from
-generations, not crowds. The same checks can now be applied to AI
-systems in use today, such as teams of AI assistants working
-together.</p>
+<p>AI systems are built by people, but many of their abilities are
+learned rather than programmed. We asked whether claims that an ability
+“emerged” can be tested in a way that could also come out negative. We
+wrote down five checks and built small AI agents that must invent their
+own code words to describe objects to each other. Before each round of
+experiments, we published the rules for judging its results. The agents
+learned languages that also worked for combinations of objects they had
+never seen. An apparent sudden leap in ability as the agents got bigger
+turned out to be mostly an effect of strict scoring: with partial
+credit, the improvement was gradual. Mixing up which agents talked to
+each other did not make them better than keeping fixed partners. But
+regularly replacing agents with newcomers, who had to learn the language
+from the others, improved results in all three rounds, and did better
+than the “refresh” we tested as a comparison. That supports the idea
+that passing a language on to new learners can improve it, although the
+exact mechanism is still open. The languages showed some structure, but
+not enough to pass our structure test. In this testbed, improvement came
+from generations, not crowds. Next, we plan to apply these checks to
+teams of language-model agents.</p>
 <h2 id="1-introduction">1. Introduction</h2>
-<p>“Artificial intelligence” names where intelligence comes from: it is
-built. It says nothing about <em>how</em> capabilities arise. In modern
-learning systems many abilities are not written down by anyone; they
-follow from scale, data and interaction. “Emergent intelligence” would
-be a better description, but only if it means something specific. A word
-that every system qualifies for is useless, and claims of emergence are
-known to be fragile: abrupt “emergent abilities” of language models [8]
-can be artefacts of discontinuous metrics [7].</p>
+<p>“Artificial intelligence” describes systems built by people;
+“emergence” concerns how capabilities arise within them. These
+descriptions are compatible. Learned abilities need not be explicitly
+programmed, but that alone does not distinguish emergence from ordinary
+learning and generalization. A useful account must specify what evidence
+supports the claim and what would count against it. Claims of abrupt
+“emergent abilities” of language models [8] can be artefacts of
+discontinuous metrics [7].</p>
 <p>We therefore treat emergence as an empirical property with a
 falsifiable test. Our contributions:</p>
 <ol type="1">
@@ -74,14 +78,15 @@ explicit verdict rules, reported as a profile rather than a label
 implements the criteria for populations of communicating agents, with
 batched population training, turnover and perturbation controls, and
 bootstrap statistics (Section 4).</p></li>
-<li><p><strong>A pre-registered, four-round study</strong> of 256 runs,
+<li><p><strong>A pre-registered, three-round study</strong> of 256 runs,
 with thresholds committed to git before each round (Section 5). The
 profile it yields is C1 <strong>PASS</strong>, C2 <strong>PASS</strong>,
 C3 <strong>FAIL</strong>, C4 <strong>FAIL</strong>, C5
 <strong>MIRAGE</strong>.</p></li>
-<li><p><strong>A mechanism result for C2</strong>: generational turnover
-improves emergent languages through cultural transmission, not through
-restored plasticity.</p></li>
+<li><p><strong>A controlled result for C2</strong>: generational
+turnover improves held-out performance across three rounds and
+outperforms the tested shrink-and-perturb control, supporting an
+intergenerational-transmission interpretation.</p></li>
 </ol>
 <h2 id="2-related-work">2. Related work</h2>
 <p><strong>Emergent communication.</strong> Agents trained to coordinate
@@ -99,15 +104,20 @@ idea.</p>
 documented abilities that appear abruptly with scale; Schaeffer et al.
 [7] argued many are produced by non-linear or discontinuous metrics. Our
 C5 criterion operationalizes that critique.</p>
-<p><strong>Plasticity.</strong> Deep networks lose the ability to learn
-under continued training [3]; re-initialization and shrink-and-perturb
-[1] restore it. Any benefit of agent turnover must be separated from
-this effect, which is what our C2c control does.</p>
+<p><strong>Plasticity.</strong> Deep networks can lose the ability to
+learn under continued training [3]; re-initialization and
+shrink-and-perturb [1] can help restore it. This is an alternative
+explanation for turnover’s benefit. Our C2c comparison tests a specific
+plasticity-oriented control, rather than excluding all
+plasticity-related explanations.</p>
 <h2 id="3-an-operational-definition">3. An operational definition</h2>
 <p>Let a system S be produced by a designer specification D =
 (architecture, objective, data, training procedure). A capability of S
 is <em>emergent with respect to D</em> to the degree that it meets the
-criteria in Table 1.</p>
+criteria in Table 1. These are proposed operational criteria, not
+necessary and sufficient conditions for intelligence. In this testbed,
+C1 is a deliberately limited proxy: generalization to held-out
+combinations within the same reconstruction task.</p>
 <table>
 <thead>
 <tr class="header">
@@ -150,8 +160,10 @@ seeds (10,000 resamples). A test is <strong>PASS</strong> when the whole
 interval clears its threshold, <strong>INCONCLUSIVE</strong> when only
 the mean does, and <strong>FAIL</strong> otherwise; C5 adds
 <strong>MIRAGE</strong> and NO-JUMP outcomes. A two-sided Mann–Whitney U
-test is reported as a secondary statistic that is robust to outlier
-seeds.</p>
+test is reported as a secondary rank-based statistic. A
+<strong>FAIL</strong> is a verdict under the specified rule, not proof
+that the underlying effect is absent. In particular, an interval
+spanning zero does not establish equivalence between conditions.</p>
 <p><strong>Pre-registration.</strong> Every round’s design, thresholds
 and verdict rules were written into <code>DEFINITION.md</code> and
 committed to a public git repository before any run of that round.
@@ -326,19 +338,22 @@ of C1: generalization to unseen combinations of familiar parts.</p>
 is real but not disentangled</h3>
 <p>Topographic similarity rises reliably above the untrained baseline in
 every round (gain 0.114–0.152). Positional disentanglement improves too,
-but stays below the pre-registered 0.05 margin:
-<strong>INCONCLUSIVE</strong> at 5 and 10 seeds and
-<strong>FAIL</strong> at 20 seeds (gain 0.039 [0.021, 0.058]);
-bag-of-symbols disentanglement shows no gain. As in [2], the languages
-generalize well without being cleanly compositional.</p>
+but its confidence interval does not clear the pre-registered 0.05
+margin: <strong>INCONCLUSIVE</strong> at 5 and 10 seeds, where the mean
+exceeds the margin, and <strong>FAIL</strong> at 20 seeds, where the
+mean is below it (gain 0.039 [0.021, 0.058]). The latter interval still
+spans the margin. Bag-of-symbols disentanglement shows no gain. Thus C4
+does not pass its combined rule; this is not evidence that the languages
+have no structure. As in [2], strong generalization need not imply
+strong compositionality.</p>
 <h3 id="53-c5-the-capability-jump-is-a-metric-mirage">5.3 C5: the
 capability jump is a metric mirage</h3>
 <p>v0.2 swept 12 hidden sizes from 4 to 256 (5 seeds each). Exact-match
 accuracy appears to switch on between sizes 32 and 96 (Figure 1).
-Per-attribute accuracy, a continuous measure of the same predictions,
-rises steadily over the whole range. The 10–90% transition widths are
-1.44 octaves for exact match and 3.78 octaves for per-attribute
-accuracy, a ratio of 2.63 [1.99, 3.80], which meets the pre-registered
+Per-attribute accuracy, a graded measure of the same predictions, rises
+steadily over the whole range. The 10–90% transition widths are 1.44
+octaves for exact match and 3.78 octaves for per-attribute accuracy, a
+ratio of 2.63 [1.99, 3.80], which meets the pre-registered
 <strong>MIRAGE</strong> rule (R ≥ 2 with the CI lower bound above 1.5).
 Because exact match requires all four attributes to be correct, it
 compresses a gradual improvement into an apparent jump, as argued in
@@ -347,20 +362,27 @@ compresses a gradual improvement into an apparent jump, as argued in
 (mean of 5 seeds per size). The apparent jump in exact match (blue)
 corresponds to a gradual rise in per-attribute accuracy (orange).
 <em>(Figure shown in the PDF.)</em></p>
-<h3 id="54-c3-interaction-within-a-generation-adds-nothing">5.4 C3:
-interaction within a generation adds nothing</h3>
+<h3
+id="54-c3-partner-mixing-does-not-demonstrate-a-generalization-advantage">5.4
+C3: partner mixing does not demonstrate a generalization advantage</h3>
 <p>Mixed populations reliably converge on a shared language: senders and
 receivers that never trained as a fixed pair understand each other
 (cross-play accuracy 0.82–0.96, against 0 for isolated pairs). This does
 not count towards C3, because the mixed objective requires it. On the
 capability that C3 scores, held-out generalization, mixed populations
-are no better than isolated pairs at equal compute: not with homogeneous
-agents (v0: −0.020; v0.2 replicate: −0.016), and not when agents learn
-at different speeds (v0.2 C3b, learning-rate multipliers from 0.5 to 2:
-−0.012 [−0.221, 0.135]). At N = 8, mixing even made languages less
-disentangled (posdis −0.052 [−0.076, −0.026], secondary).</p>
-<h3 id="55-c2-turnover-improves-languages-through-transmission">5.5 C2:
-turnover improves languages, through transmission</h3>
+did not demonstrate an advantage over isolated pairs at equal compute.
+Point estimates were negative with homogeneous agents (v0: −0.020; v0.2
+replicate: −0.016) and when agents learned at different speeds (v0.2
+C3b, learning-rate multipliers from 0.5 to 2: −0.012 [−0.221, 0.135]).
+The heterogeneous interval permits both benefit and harm; the
+<strong>FAIL</strong> verdict does not establish equivalence. Both arms
+contain interacting sender–receiver pairs, so this tests partner mixing
+rather than interaction versus no interaction. At N = 8, mixing even
+made languages less disentangled (posdis −0.052 [−0.076, −0.026],
+secondary).</p>
+<h3
+id="55-c2-turnover-improves-generalization-controls-probe-the-mechanism">5.5
+C2: turnover improves generalization; controls probe the mechanism</h3>
 <p>Replacing agents during training improved held-out accuracy relative
 to continued training in all three rounds (Table 2). The no-turnover arm
 tends to drift after convergence, and some seeds collapse (to 0.426 in
@@ -385,19 +407,27 @@ agent’s accuracy with its partners fell to 0.02 but recovered to 0.53
 within 50 steps, against 0.07 for a reset. Its knowledge was latent, not
 lost.</p>
 <p>The result (Figure 2): turnover beat shrink-and-perturb by 0.190
-[0.004, 0.409] (<strong>PASS</strong>, Mann–Whitney p = 0.045), and
-shrink-and-perturb did no better than no turnover at all (final accuracy
-0.771 vs. 0.728, p = 0.79). Turnover also produced more structured
-languages than shrink-and-perturb (topsim gain difference 0.046 [0.004,
-0.093]). Under the pre-registered reading, relearning the language from
-the population adds something that restored plasticity does not. This is
-what iterated learning predicts [4]. The effect is real at this sample
-size but its lower confidence bound is close to zero, and it is partly
-driven by control seeds that collapse.</p>
+[0.004, 0.409] (<strong>PASS</strong>, Mann–Whitney p = 0.045), while
+the difference between shrink-and-perturb and no turnover was not
+statistically significant (final accuracy 0.771 vs. 0.728, p = 0.79).
+This latter comparison does not establish equivalence. Turnover also
+produced more structured languages than shrink-and-perturb (topsim gain
+difference 0.046 [0.004, 0.093]). These findings support an
+intergenerational-transmission interpretation consistent with iterated
+learning [4]: turnover’s benefit exceeds that of the tested
+shrink-and-perturb intervention. However, matching weight scale and
+observing rapid recovery do not establish that the interventions restore
+plasticity identically. The comparison therefore narrows the mechanism
+without uniquely identifying it. C2c clears its pre-registered
+threshold, but its lower confidence bound is close to zero and the
+difference is partly driven by control seeds that collapse. The result
+may reflect improved stability as well as gains in performance; it does
+not establish indefinite or monotonic improvement.</p>
 <p><strong>Figure 2.</strong> C2c. Final held-out accuracy per seed (10
-seeds per arm, N = 4, 24,000 steps). Turnover ends near 1.0;
-shrink-and-perturb and no turnover are statistically indistinguishable.
-<em>(Figure shown in the PDF.)</em></p>
+seeds per arm, N = 4, 24,000 steps). Turnover ends near 1.0; no
+statistically significant difference was detected between
+shrink-and-perturb and no turnover. <em>(Figure shown in the
+PDF.)</em></p>
 <h2 id="6-deviations-corrections-and-incidents">6. Deviations,
 corrections and incidents</h2>
 <p>We list every departure from the pre-registered plan, because the
@@ -433,21 +463,30 @@ compositional generalization, a weak form of C1. Results come from one
 task, one architecture family and one channel size, and C3 was tested
 only for pairings re-drawn every step. Thresholds such as the 0.05
 disentanglement margin are conventions we fixed in advance, not natural
-constants. With 10 seeds, C2c has limited precision; a larger
-replication would sharpen the effect size. Finally, a profile describes
-a system, not intelligence in general: the criteria are intended to be
-applied to other systems, where the verdicts may differ.</p>
+constants. With 10 seeds per arm, C2c has limited precision; a larger
+replication would sharpen the effect size. The 256 runs span multiple
+tests, model sizes and controls; they are not 256 independent
+replications of each claim. A stronger mechanism test would vary access
+to established communication partners while controlling the reset
+intervention and training budget. Finally, the profile describes
+performance under these operational tests, not intelligence in general.
+Applying the framework to other systems requires suitable tasks,
+controls and pre-registered thresholds; their verdicts may differ.</p>
 <h2 id="8-conclusion-and-future-work">8. Conclusion and future work</h2>
-<p>An operational, pre-registered definition of emergence is practical
-on a single GPU, and it discriminates: in this system it returned two
-passes, two failures and one mirage. The clearest positive finding is
-about mechanism. Capability improved when the language had to be passed
-to new learners, and did not improve when agents merely interacted more
-or regained plasticity. The next step applies the same harness and
-criteria to societies of language-model agents with persistent memory,
-running under a deterministic runtime authority layer that records
-tamper-evident evidence, to ask whether the same profile appears in
-systems that are deployed today.</p>
+<p>EI-Bench makes five proposed criteria for emergence operational and
+testable on a single GPU. In this communication testbed, it returned two
+passes, two failures and one metric mirage, with all outcomes reported.
+The clearest positive result is that generational turnover improved
+held-out performance relative to continued training across three rounds.
+Its advantage over the tested shrink-and-perturb control supports a
+transmission-based explanation, while leaving the mechanism open to
+stronger tests. Partner mixing did not demonstrate a generalization
+advantage at equal compute. Together, these results make generational
+turnover a promising direction for further study and show why emergence
+claims benefit from explicit controls and measurement checks. The next
+step is to adapt and pre-register the framework for teams of
+language-model agents with persistent memory, using a deterministic
+runtime authority layer to record tamper-evident evidence.</p>
 <h2 id="data-and-code-availability">Data and code availability</h2>
 <p>Code (Apache-2.0), the full pre-registration history and all reports
 are in EI-Bench, <a
@@ -455,6 +494,14 @@ href="https://github.com/amitb-quantum/ei-bench">https://github.com/amitb-quantu
 All 256 per-run result files, the scored reports and the
 pre-registration history are included as a dataset file in this Zenodo
 record.</p>
+<h2 id="revision-note">Revision note</h2>
+<p>Editorial clarification, 31 October 2026. This revised text corrects
+the experimental-round count (three rounds, not four) and clarifies the
+scope of generalization, the interpretation of benchmark failures, the
+scope of the C3 test (partner mixing) and the evidence for the turnover
+mechanism. Reported numerical results, thresholds and verdicts are
+unchanged. No new experiments are reported. The data file in this record
+is unchanged.</p>
 <h2 id="acknowledgements">Acknowledgements</h2>
 <p>Experiment design, code and drafting were carried out with the
 assistance of an AI system (Claude, Anthropic). All experiments were
